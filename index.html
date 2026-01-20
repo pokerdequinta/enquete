@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enquetes - Poker de Quinta</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@300;400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Roboto', sans-serif;background:#0d1b0d;color:#fff;min-height:100vh}
+.logo-top{text-align:center;padding:20px}
+.logo-top img{max-width:200px}
+.container{max-width:1000px;margin:auto;padding:20px}
+header{text-align:center;background:#102810;border:2px solid #d4a121;border-radius:15px;padding:30px;margin-bottom:30px}
+h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
+.subtitle{margin-top:10px}
+
+.enquete-section{background:#102810;border:2px solid #d4a121;border-radius:12px;padding:25px;margin-bottom:25px}
+.enquete-section h2{font-family:'Anton';color:#d4a121;margin-bottom:20px;font-size:1.8em}
+
+.vote-option{background:rgba(255,255,255,.05);padding:15px;border-radius:10px;margin-bottom:10px;cursor:pointer;border:2px solid transparent;transition:all 0.3s}
+.vote-option:hover{border-color:#d4a121;background:rgba(212,161,33,.1)}
+.vote-option.selected{border-color:#d4a121;background:rgba(212,161,33,.2)}
+.option-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.option-name{font-weight:bold;font-size:1.1em}
+.option-votes{color:#d4a121;font-weight:bold}
+.progress-bar{background:#1a3d1a;height:8px;border-radius:4px;overflow:hidden;margin-top:8px}
+.progress-fill{background:#d4a121;height:100%;transition:width 0.3s}
+
+.form-group{margin-bottom:20px}
+.form-group label{color:#d4a121;font-weight:bold;display:block;margin-bottom:8px}
+.form-group select{width:100%;padding:12px;border-radius:8px;border:1px solid #2d5016;background:#1a3d1a;color:#fff;font-size:1em}
+
+.vote-btn{width:100%;padding:15px;background:#d4a121;border:none;border-radius:10px;font-weight:bold;cursor:pointer;color:#000;font-size:1.1em;margin-top:15px}
+.vote-btn:disabled{opacity:0.5;cursor:not-allowed}
+
+.voters-list{margin-top:15px;padding-top:15px;border-top:1px solid rgba(212,161,33,.3)}
+.voters-list h4{color:#d4a121;margin-bottom:10px;font-size:0.9em}
+.voter-tag{display:inline-block;background:#2d5016;padding:4px 10px;border-radius:15px;margin:3px;font-size:0.85em}
+
+.status-indicator{position:fixed;top:10px;right:10px;background:#2d5016;padding:8px 15px;border-radius:20px;font-size:0.85em;border:1px solid #d4a121}
+.status-indicator.connected{background:#1a3d1a;border-color:#4CAF50}
+
+.results-section{background:#102810;border:2px dashed #d4a121;border-radius:12px;padding:20px;margin-top:20px}
+.result-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(212,161,33,.2)}
+.result-item:last-child{border:none}
+
+.dashboard{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:25px}
+.dashboard-card{background:#102810;border:2px solid #d4a121;border-radius:12px;padding:20px;text-align:center}
+.dashboard-card .card-icon{font-size:2.5em;margin-bottom:10px}
+.dashboard-card h3{font-family:'Anton';color:#d4a121;font-size:0.9em;margin-bottom:10px;letter-spacing:1px}
+.dashboard-card .card-value{font-family:'Anton';font-size:1.4em;color:#fff;margin-bottom:5px;min-height:40px}
+.dashboard-card .card-detail{color:#d4a121;font-size:0.9em;opacity:0.9}
+
+@media(max-width:768px){
+.option-header{flex-direction:column;align-items:flex-start;gap:5px}
+.dashboard{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<div class="status-indicator" id="statusIndicator">🔄 Conectando...</div>
+
+<div class="logo-top">
+<img src="logo pdq.png" onerror="this.style.display='none'">
+</div>
+
+<div class="container">
+
+<header>
+<h1>ENQUETES POKER DE QUINTA</h1>
+<div class="subtitle">📊 Vote nas opções da próxima etapa</div>
+</header>
+
+<!-- DASHBOARD DE RESULTADOS -->
+<div class="dashboard" id="dashboard">
+<div class="dashboard-card">
+<div class="card-icon">🍽️</div>
+<h3>JANTA MAIS VOTADA</h3>
+<div class="card-value" id="dashJantaVencedor">-</div>
+<div class="card-detail" id="dashJantaVotos">0 votos</div>
+</div>
+<div class="dashboard-card">
+<div class="card-icon">🎴</div>
+<h3>MÃO MAIS VOTADA</h3>
+<div class="card-value" id="dashMaoVencedor">-</div>
+<div class="card-detail" id="dashMaoVotos">0 votos</div>
+</div>
+<div class="dashboard-card">
+<div class="card-icon">👥</div>
+<h3>PARTICIPAÇÃO</h3>
+<div class="card-value" id="dashParticipacao">0%</div>
+<div class="card-detail" id="dashTotalVotos">0 votantes</div>
+</div>
+</div>
+
+<div class="form-group">
+<label>👤 Selecione seu nome para votar</label>
+<select id="playerSelect">
+<option value="">Escolha seu nome...</option>
+</select>
+</div>
+
+<!-- ENQUETE 1: JANTA -->
+<div class="enquete-section">
+<h2>🍽️ ENQUETE: JANTA</h2>
+<p style="margin-bottom:20px;opacity:0.9">Escolha sua opção preferida para a janta:</p>
+<div id="jantaOptions"></div>
+<button class="vote-btn" id="btnVotarJanta" disabled>VOTAR NA JANTA</button>
+<div class="results-section" id="jantaResults" style="display:none">
+<h3 style="color:#d4a121;margin-bottom:15px">📊 Resultados</h3>
+<div id="jantaResultsList"></div>
+</div>
+</div>
+
+<!-- ENQUETE 2: MÃO DA ETAPA -->
+<div class="enquete-section">
+<h2>🎴 ENQUETE: MÃO DA ETAPA</h2>
+<p style="margin-bottom:20px;opacity:0.9">Vote na sua mão favorita da etapa:</p>
+<div id="maoOptions"></div>
+<button class="vote-btn" id="btnVotarMao" disabled>VOTAR NA MÃO</button>
+<div class="results-section" id="maoResults" style="display:none">
+<h3 style="color:#d4a121;margin-bottom:15px">📊 Resultados</h3>
+<div id="maoResultsList"></div>
+</div>
+</div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getDatabase, ref, set, onValue, push, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_XXjcjJYM73wLTTzpDgzKCOZnztcJhjE",
+  authDomain: "poker-de-quinta.firebaseapp.com",
+  databaseURL: "https://poker-de-quinta-default-rtdb.firebaseio.com",
+  projectId: "poker-de-quinta",
+  storageBucket: "poker-de-quinta.firebasestorage.app",
+  messagingSenderId: "776724152456",
+  appId: "1:776724152456:web:fbffde9a1c1a7628c61f3d"
+};
+
+const jogadores = ["Amarildo","Boy","Buiu","Caio","Charles","Cleversson","Davi","Gera","Diego","Dos Anjos","Eduardo","Fernando","Gregory","Gaspar","Guilherme","Guti","Igor","Izidio","Jean","Jean Rebuy","Junior","Leo","Loreto","Lucas","Matheus","Maykon","Neto","Nil","Peterson","Rafael","Ricardo Amarante","Ricardo Linhares","Ricardo Matoso","Robson","Sergio","Solano","Tigre","Van Van","Waltinho","Wesley"];
+
+const opcoesJanta = [
+ "Vaca Atolada",
+  "Strogonoff",
+  "Frango Assado com Arroz",
+  "Quirera com Suã",
+  "Pão Com Pernil",
+  "Arroz Carreteiro",
+  "Carne de Panela"
+];
+
+const opcoesMao = [
+"7 e 2 OFF",
+  "K e 3 OFF",
+  "Q e 2 OFF",
+  "J e 4 OFF",
+  "10 e 2 OFF",
+];
+
+let db;
+let votosJanta = {};
+let votosMao = {};
+let jantaSelecionada = null;
+let maoSelecionada = null;
+let jogadorAtual = null;
+
+try {
+  const app = initializeApp(firebaseConfig);
+  db = getDatabase(app);
+  statusIndicator.textContent = '✅ Conectado';
+  statusIndicator.classList.add('connected');
+  
+  onValue(ref(db, 'enquetes/janta'), (snapshot) => {
+    votosJanta = snapshot.val() || {};
+    renderizarOpcoes('janta');
+    atualizarDashboard();
+  });
+  
+  onValue(ref(db, 'enquetes/mao'), (snapshot) => {
+    votosMao = snapshot.val() || {};
+    renderizarOpcoes('mao');
+    atualizarDashboard();
+  });
+} catch (e) {
+  statusIndicator.textContent = '❌ Erro de conexão';
+  console.error(e);
+}
+
+// Preencher select de jogadores
+const selectJogador = document.getElementById('playerSelect');
+jogadores.sort().forEach(j => {
+  const o = document.createElement('option');
+  o.value = o.textContent = j;
+  selectJogador.appendChild(o);
+});
+
+selectJogador.onchange = (e) => {
+  jogadorAtual = e.target.value;
+  btnVotarJanta.disabled = !jogadorAtual || !jantaSelecionada;
+  btnVotarMao.disabled = !jogadorAtual || !maoSelecionada;
+  renderizarOpcoes('janta');
+  renderizarOpcoes('mao');
+};
+
+function renderizarOpcoes(tipo) {
+  const opcoes = tipo === 'janta' ? opcoesJanta : opcoesMao;
+  const votos = tipo === 'janta' ? votosJanta : votosMao;
+  const container = document.getElementById(tipo + 'Options');
+  const resultsContainer = document.getElementById(tipo + 'Results');
+  const resultsList = document.getElementById(tipo + 'ResultsList');
+  
+  let totalVotos = 0;
+  let votosPorOpcao = {};
+  let votantesPorOpcao = {};
+  
+  // Contar votos
+  Object.values(votos).forEach(voto => {
+    totalVotos++;
+    votosPorOpcao[voto.opcao] = (votosPorOpcao[voto.opcao] || 0) + 1;
+    if (!votantesPorOpcao[voto.opcao]) votantesPorOpcao[voto.opcao] = [];
+    votantesPorOpcao[voto.opcao].push(voto.jogador);
+  });
+  
+  // Verificar se jogador já votou
+  let jaVotou = false;
+  let votoAnterior = null;
+  Object.entries(votos).forEach(([key, voto]) => {
+    if (voto.jogador === jogadorAtual) {
+      jaVotou = true;
+      votoAnterior = voto.opcao;
+    }
+  });
+  
+  container.innerHTML = '';
+  opcoes.forEach(opcao => {
+    const numVotos = votosPorOpcao[opcao] || 0;
+    const percentual = totalVotos > 0 ? (numVotos / totalVotos * 100).toFixed(1) : 0;
+    const isSelected = tipo === 'janta' ? jantaSelecionada === opcao : maoSelecionada === opcao;
+    const jaVotouNesta = votoAnterior === opcao;
+    
+    const div = document.createElement('div');
+    div.className = 'vote-option' + (isSelected ? ' selected' : '');
+    div.onclick = () => {
+      if (!jogadorAtual) {
+        alert('Selecione seu nome primeiro!');
+        return;
+      }
+      if (tipo === 'janta') {
+        jantaSelecionada = opcao;
+        btnVotarJanta.disabled = false;
+      } else {
+        maoSelecionada = opcao;
+        btnVotarMao.disabled = false;
+      }
+      renderizarOpcoes(tipo);
+    };
+    
+    div.innerHTML = `
+      <div class="option-header">
+        <span class="option-name">${opcao} ${jaVotouNesta ? '✅' : ''}</span>
+        <span class="option-votes">${numVotos} voto${numVotos !== 1 ? 's' : ''} (${percentual}%)</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${percentual}%"></div>
+      </div>
+      ${numVotos > 0 ? `
+        <div class="voters-list">
+          <h4>Votaram nesta opção:</h4>
+          ${votantesPorOpcao[opcao].map(v => `<span class="voter-tag">${v}</span>`).join('')}
+        </div>
+      ` : ''}
+    `;
+    
+    container.appendChild(div);
+  });
+  
+  // Mostrar resultados se houver votos
+  if (totalVotos > 0) {
+    resultsContainer.style.display = 'block';
+    const ordenado = Object.entries(votosPorOpcao).sort((a, b) => b[1] - a[1]);
+    resultsList.innerHTML = ordenado.map(([opcao, votos]) => `
+      <div class="result-item">
+        <strong>${opcao}</strong>
+        <span>${votos} voto${votos !== 1 ? 's' : ''}</span>
+      </div>
+    `).join('');
+  }
+}
+
+btnVotarJanta.onclick = async () => {
+  if (!jogadorAtual || !jantaSelecionada) return;
+  
+  // Verificar se já votou e remover voto anterior
+  const votosRef = ref(db, 'enquetes/janta');
+  const snapshot = await get(votosRef);
+  if (snapshot.exists()) {
+    const votos = snapshot.val();
+    for (let key in votos) {
+      if (votos[key].jogador === jogadorAtual) {
+        await set(ref(db, `enquetes/janta/${key}`), null);
+      }
+    }
+  }
+  
+  // Registrar novo voto
+  await push(ref(db, 'enquetes/janta'), {
+    jogador: jogadorAtual,
+    opcao: jantaSelecionada,
+    data: new Date().toISOString()
+  });
+  
+  alert('Voto registrado com sucesso! 🎉');
+  jantaSelecionada = null;
+  btnVotarJanta.disabled = true;
+};
+
+btnVotarMao.onclick = async () => {
+  if (!jogadorAtual || !maoSelecionada) return;
+  
+  // Verificar se já votou e remover voto anterior
+  const votosRef = ref(db, 'enquetes/mao');
+  const snapshot = await get(votosRef);
+  if (snapshot.exists()) {
+    const votos = snapshot.val();
+    for (let key in votos) {
+      if (votos[key].jogador === jogadorAtual) {
+        await set(ref(db, `enquetes/mao/${key}`), null);
+      }
+    }
+  }
+  
+  // Registrar novo voto
+  await push(ref(db, 'enquetes/mao'), {
+    jogador: jogadorAtual,
+    opcao: maoSelecionada,
+    data: new Date().toISOString()
+  });
+  
+  alert('Voto registrado com sucesso! 🎉');
+  maoSelecionada = null;
+  btnVotarMao.disabled = true;
+};
+
+function atualizarDashboard() {
+  // Contar votos da janta
+  let votosPorJanta = {};
+  let votantesJanta = new Set();
+  Object.values(votosJanta).forEach(voto => {
+    votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
+    votantesJanta.add(voto.jogador);
+  });
+  
+  // Contar votos da mão
+  let votosPorMao = {};
+  let votantesMao = new Set();
+  Object.values(votosMao).forEach(voto => {
+    votosPorMao[voto.opcao] = (votosPorMao[voto.opcao] || 0) + 1;
+    votantesMao.add(voto.jogador);
+  });
+  
+  // Janta mais votada
+  let jantaVencedor = '-';
+  let jantaMaxVotos = 0;
+  Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
+    if (votos > jantaMaxVotos) {
+      jantaMaxVotos = votos;
+      jantaVencedor = opcao;
+    }
+  });
+  document.getElementById('dashJantaVencedor').textContent = jantaVencedor;
+  document.getElementById('dashJantaVotos').textContent = `${jantaMaxVotos} voto${jantaMaxVotos !== 1 ? 's' : ''}`;
+  
+  // Mão mais votada
+  let maoVencedor = '-';
+  let maoMaxVotos = 0;
+  Object.entries(votosPorMao).forEach(([opcao, votos]) => {
+    if (votos > maoMaxVotos) {
+      maoMaxVotos = votos;
+      maoVencedor = opcao;
+    }
+  });
+  document.getElementById('dashMaoVencedor').textContent = maoVencedor;
+  document.getElementById('dashMaoVotos').textContent = `${maoMaxVotos} voto${maoMaxVotos !== 1 ? 's' : ''}`;
+  
+  // Participação
+  const totalVotantes = new Set([...votantesJanta, ...votantesMao]).size;
+  const participacao = jogadores.length > 0 ? ((totalVotantes / jogadores.length) * 100).toFixed(1) : 0;
+  document.getElementById('dashParticipacao').textContent = `${participacao}%`;
+  document.getElementById('dashTotalVotos').textContent = `${totalVotantes} votante${totalVotantes !== 1 ? 's' : ''}`;
+}
+
+</script>
+</body>
+</html>
