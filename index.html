@@ -53,6 +53,16 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 .dashboard-card .card-value{font-family:'Anton';font-size:1.4em;color:#fff;margin-bottom:5px;min-height:40px}
 .dashboard-card .card-detail{color:#d4a121;font-size:0.9em;opacity:0.9}
 
+.add-btn{width:100%;padding:15px;background:#d4a121;border:none;border-radius:10px;font-weight:bold;cursor:pointer;margin-bottom:10px;color:#000}
+.remove-vote-btn{background:#c72c48;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:0.85em;margin-left:5px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);justify-content:center;align-items:center;z-index:1000}
+.modal.active{display:flex}
+.modal-content{background:#102810;border:2px solid #d4a121;border-radius:15px;padding:30px;width:90%;max-width:500px}
+.modal-buttons{display:flex;gap:10px;margin-top:20px}
+.modal-btn{flex:1;padding:10px;font-weight:bold;border:none;border-radius:8px;cursor:pointer}
+.modal-btn.confirm{background:#d4a121;color:#000}
+.modal-btn.cancel{background:#c72c48;color:#fff}
+
 @media(max-width:768px){
 .option-header{flex-direction:column;align-items:flex-start;gap:5px}
 .dashboard{grid-template-columns:1fr}
@@ -130,6 +140,23 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 
 </div>
 
+<button class="add-btn" id="btnModoAdmin" style="position:fixed;bottom:10px;right:10px;width:auto;padding:8px 15px;background:rgba(13,27,13,0.3);border:1px solid rgba(212,161,33,0.1);opacity:0.15;font-size:0.7em;transition:opacity 0.3s">🔐</button>
+
+<div class="modal" id="modalAdmin">
+<div class="modal-content">
+<h2 style="color: #8b0000;">🔐 Modo Administrador</h2>
+<p style="margin: 15px 0; opacity: 0.8;">Digite a senha de administrador para acessar funções exclusivas:</p>
+<div class="form-group">
+<label>Senha Admin</label>
+<input type="password" id="senhaAdmin" placeholder="Digite a senha">
+</div>
+<div class="modal-buttons">
+<button class="modal-btn cancel" id="btnFecharAdmin">Cancelar</button>
+<button class="modal-btn confirm" id="btnAcessarAdmin" style="background:#8b0000; color:#fff">Acessar</button>
+</div>
+</div>
+</div>
+
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getDatabase, ref, set, onValue, push, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
@@ -147,7 +174,7 @@ const firebaseConfig = {
 const jogadores = ["Amarildo","Boy","Buiu","Caio","Charles","Cleversson","Davi","Gera","Diego","Dos Anjos","Eduardo","Fernando","Gregory","Gaspar","Guilherme","Guti","Igor","Izidio","Jean","Jean Rebuy","Junior","Leo","Loreto","Lucas","Matheus","Maykon","Neto","Nil","Peterson","Rafael","Ricardo Amarante","Ricardo Linhares","Ricardo Matoso","Robson","Sergio","Solano","Tigre","Van Van","Waltinho","Wesley"];
 
 const opcoesJanta = [
- "Vaca Atolada",
+  "Vaca Atolada",
   "Strogonoff",
   "Frango Assado com Arroz",
   "Quirera com Suã",
@@ -157,11 +184,11 @@ const opcoesJanta = [
 ];
 
 const opcoesMao = [
-"7 e 2 OFF",
+  "7 e 2 OFF",
   "K e 3 OFF",
   "Q e 2 OFF",
   "J e 4 OFF",
-  "10 e 2 OFF",
+  "10 e 2 OFF"
 ];
 
 let db;
@@ -170,6 +197,7 @@ let votosMao = {};
 let jantaSelecionada = null;
 let maoSelecionada = null;
 let jogadorAtual = null;
+let modoAdmin = false;
 
 try {
   const app = initializeApp(firebaseConfig);
@@ -273,7 +301,11 @@ function renderizarOpcoes(tipo) {
       ${numVotos > 0 ? `
         <div class="voters-list">
           <h4>Votaram nesta opção:</h4>
-          ${votantesPorOpcao[opcao].map(v => `<span class="voter-tag">${v}</span>`).join('')}
+          ${votantesPorOpcao[opcao].map(v => {
+            const votoKey = Object.keys(votos).find(key => votos[key].jogador === v && votos[key].opcao === opcao);
+            const btnRemover = modoAdmin ? `<button class="remove-vote-btn" onclick="removerVoto('${tipo}','${votoKey}')">❌</button>` : '';
+            return `<span class="voter-tag">${v}${btnRemover}</span>`;
+          }).join('')}
         </div>
       ` : ''}
     `;
@@ -395,6 +427,36 @@ function atualizarDashboard() {
   document.getElementById('dashParticipacao').textContent = `${participacao}%`;
   document.getElementById('dashTotalVotos').textContent = `${totalVotantes} votante${totalVotantes !== 1 ? 's' : ''}`;
 }
+
+// Função para remover voto (apenas admin)
+window.removerVoto = async (tipo, votoKey) => {
+  if (!modoAdmin) return;
+  if (!confirm('Remover este voto?')) return;
+  
+  try {
+    await set(ref(db, `enquetes/${tipo}/${votoKey}`), null);
+    alert('Voto removido com sucesso!');
+  } catch (e) {
+    alert('Erro ao remover voto: ' + e.message);
+  }
+};
+
+// Modo Admin
+btnModoAdmin.onclick = () => modalAdmin.classList.add('active');
+btnFecharAdmin.onclick = () => modalAdmin.classList.remove('active');
+btnAcessarAdmin.onclick = () => {
+  if (document.getElementById('senhaAdmin').value === "poker2026") {
+    modoAdmin = true;
+    modalAdmin.classList.remove('active');
+    btnModoAdmin.style.background = '#4CAF50';
+    btnModoAdmin.style.opacity = '1';
+    alert("Modo Admin Ativado! Agora você pode remover votos.");
+    renderizarOpcoes('janta');
+    renderizarOpcoes('mao');
+  } else {
+    alert("Senha incorreta!");
+  }
+};
 
 </script>
 </body>
