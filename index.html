@@ -209,6 +209,166 @@ let maoSelecionada = null;
 let jogadorAtual = null;
 let modoAdmin = false;
 
+// FUNÇÃO PARA VERIFICAR PRAZO DE VOTAÇÃO
+function verificarPrazoVotacao() {
+  const dataLimite = new Date('2025-01-26T22:00:00');
+  const agora = new Date();
+  
+  // Se já passou da data limite
+  if (agora > dataLimite) {
+    return {
+      expirado: true,
+      mensagem: '⏰ A votação da janta foi encerrada!',
+      motivo: 'Prazo finalizado'
+    };
+  }
+  
+  // Se for segunda-feira após 22:00 (mesmo antes da data limite)
+  if (agora.getDay() === 1 && agora.getHours() >= 22) {
+    return {
+      expirado: true,
+      mensagem: '⏰ A votação da janta foi encerrada!',
+      motivo: 'Segunda-feira após 22:00h'
+    };
+  }
+  
+  return { expirado: false };
+}
+
+// FUNÇÃO PARA EXIBIR JANTA VENCEDORA
+function exibirJantaVencedora() {
+  const prazo = verificarPrazoVotacao();
+  const resultsContainer = document.getElementById('jantaResults');
+  const resultsList = document.getElementById('jantaResultsList');
+  
+  if (prazo.expirado) {
+    // Calcular a janta mais votada
+    let votosPorJanta = {};
+    Object.values(votosJanta).forEach(voto => {
+      votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
+    });
+    
+    // Encontrar a mais votada
+    let jantaVencedora = '-';
+    let maxVotos = 0;
+    let empate = false;
+    
+    Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
+      if (votos > maxVotos) {
+        maxVotos = votos;
+        jantaVencedora = opcao;
+        empate = false;
+      } else if (votos === maxVotos && maxVotos > 0) {
+        empate = true;
+      }
+    });
+    
+    // Criar mensagem especial
+    const mensagemVencedora = empate 
+      ? '🏆 EMPATE! Mais de uma opção recebeu o mesmo número de votos.'
+      : `🏆 JANTA VENCEDORA: ${jantaVencedora} (${maxVotos} voto${maxVotos !== 1 ? 's' : ''})`;
+    
+    // Exibir em destaque
+    const divVencedora = document.createElement('div');
+    divVencedora.style.cssText = `
+      background: linear-gradient(135deg, #d4a121, #b8860b);
+      border: 3px solid #ffd700;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: center;
+      color: #000;
+      font-weight: bold;
+      font-size: 1.2em;
+      box-shadow: 0 4px 15px rgba(212, 161, 33, 0.5);
+    `;
+    
+    divVencedora.innerHTML = `
+      <div style="font-size: 2em; margin-bottom: 10px;">🎉</div>
+      <div>${mensagemVencedora}</div>
+      <div style="margin-top: 10px; font-size: 0.9em; opacity: 0.9;">
+        Votação encerrada em ${prazo.motivo}
+      </div>
+    `;
+    
+    // Inserir no topo dos resultados
+    if (resultsList.firstChild) {
+      resultsList.insertBefore(divVencedora, resultsList.firstChild);
+    } else {
+      resultsList.appendChild(divVencedora);
+    }
+    
+    // Desabilitar botão de votar na janta
+    btnVotarJanta.disabled = true;
+    btnVotarJanta.textContent = '⏰ VOTAÇÃO ENCERRADA';
+    btnVotarJanta.style.background = '#666';
+    
+    // Atualizar dashboard com a vencedora
+    document.getElementById('dashJantaVencedor').textContent = jantaVencedora;
+    document.getElementById('dashJantaVotos').textContent = `${maxVotos} voto${maxVotos !== 1 ? 's' : ''}`;
+  }
+}
+
+// FUNÇÃO PARA ATUALIZAR STATUS DO PRAZO
+function atualizarStatusPrazo() {
+  const prazo = verificarPrazoVotacao();
+  const statusElement = document.getElementById('statusIndicator');
+  
+  if (prazo.expirado) {
+    statusElement.innerHTML = '⏰ Votação da Janta ENCERRADA';
+    statusElement.style.background = '#8b0000';
+    statusElement.style.borderColor = '#ff0000';
+    
+    // Adicionar aviso na seção da janta
+    const avisoPrazo = document.querySelector('.enquete-section:nth-child(3) > div');
+    if (avisoPrazo) {
+      avisoPrazo.innerHTML = `
+        <p style="margin-bottom: 10px; font-weight: bold; color: #ff6b6b;">⏰ VOTAÇÃO DA JANTA ENCERRADA</p>
+        <p style="opacity: 0.9; line-height: 1.6;">
+          A votação foi encerrada em <strong>${prazo.motivo}</strong>.<br>
+          O Bruxo da Cozinha já está preparando a refeição vencedora! 🧙‍♂️👨‍🍳
+        </p>
+      `;
+    }
+  }
+}
+
+// FUNÇÃO PARA CONTADOR REGRESSIVO
+function atualizarContadorRegressivo() {
+  const dataLimite = new Date('2025-01-26T22:00:00');
+  const agora = new Date();
+  
+  if (agora < dataLimite && !verificarPrazoVotacao().expirado) {
+    const diff = dataLimite - agora;
+    const horas = Math.floor(diff / (1000 * 60 * 60));
+    const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    const contadorElement = document.createElement('div');
+    contadorElement.id = 'contadorRegressivo';
+    contadorElement.style.cssText = `
+      background: rgba(212, 161, 33, 0.2);
+      border: 2px solid #d4a121;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px 0;
+      text-align: center;
+      font-weight: bold;
+      color: #d4a121;
+    `;
+    
+    contadorElement.innerHTML = `⏳ Tempo restante para votar: ${horas}h ${minutos}m`;
+    
+    const enqueteJanta = document.querySelector('.enquete-section:nth-child(3)');
+    const contadorExistente = document.getElementById('contadorRegressivo');
+    
+    if (!contadorExistente && enqueteJanta) {
+      enqueteJanta.insertBefore(contadorElement, enqueteJanta.children[2]);
+    } else if (contadorExistente) {
+      contadorExistente.innerHTML = `⏳ Tempo restante para votar: ${horas}h ${minutos}m`;
+    }
+  }
+}
+
 try {
   const app = initializeApp(firebaseConfig);
   db = getDatabase(app);
@@ -219,6 +379,7 @@ try {
     votosJanta = snapshot.val() || {};
     renderizarOpcoes('janta');
     atualizarDashboard();
+    atualizarStatusPrazo();
   });
   
   onValue(ref(db, 'enquetes/mao'), (snapshot) => {
@@ -253,6 +414,47 @@ function renderizarOpcoes(tipo) {
   const container = document.getElementById(tipo + 'Options');
   const resultsContainer = document.getElementById(tipo + 'Results');
   const resultsList = document.getElementById(tipo + 'ResultsList');
+  
+  // Limpar resultados anteriores
+  resultsList.innerHTML = '';
+  
+  // Para a enquete da janta, verificar se expirou
+  if (tipo === 'janta') {
+    const prazo = verificarPrazoVotacao();
+    if (prazo.expirado) {
+      // Desabilitar todas as opções
+      opcoes.forEach(opcao => {
+        const div = document.createElement('div');
+        div.className = 'vote-option';
+        div.style.opacity = '0.6';
+        div.style.cursor = 'not-allowed';
+        
+        const numVotos = Object.values(votos).filter(v => v.opcao === opcao).length;
+        const totalVotos = Object.keys(votos).length;
+        const percentual = totalVotos > 0 ? (numVotos / totalVotos * 100).toFixed(1) : 0;
+        
+        div.innerHTML = `
+          <div class="option-header">
+            <span class="option-name">${opcao} 🔒</span>
+            <span class="option-votes">${numVotos} voto${numVotos !== 1 ? 's' : ''} (${percentual}%)</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${percentual}%"></div>
+          </div>
+          <div style="margin-top: 10px; color: #d4a121; font-size: 0.9em;">
+            ⏰ Votação encerrada
+          </div>
+        `;
+        
+        container.appendChild(div);
+      });
+      
+      // Exibir a janta vencedora
+      exibirJantaVencedora();
+      resultsContainer.style.display = 'block';
+      return;
+    }
+  }
   
   let totalVotos = 0;
   let votosPorOpcao = {};
@@ -339,6 +541,13 @@ function renderizarOpcoes(tipo) {
 btnVotarJanta.onclick = async () => {
   if (!jogadorAtual || !jantaSelecionada) return;
   
+  // VERIFICAÇÃO DO PRAZO
+  const prazo = verificarPrazoVotacao();
+  if (prazo.expirado) {
+    alert(`❌ ${prazo.mensagem}\n${prazo.motivo}`);
+    return;
+  }
+  
   // Verificar se já votou e remover voto anterior
   const votosRef = ref(db, 'enquetes/janta');
   const snapshot = await get(votosRef);
@@ -391,13 +600,52 @@ btnVotarMao.onclick = async () => {
 };
 
 function atualizarDashboard() {
-  // Contar votos da janta
-  let votosPorJanta = {};
-  let votantesJanta = new Set();
-  Object.values(votosJanta).forEach(voto => {
-    votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
-    votantesJanta.add(voto.jogador);
-  });
+  const prazo = verificarPrazoVotacao();
+  
+  // Se a votação da janta expirou, exibir a vencedora no dashboard
+  if (prazo.expirado) {
+    let votosPorJanta = {};
+    Object.values(votosJanta).forEach(voto => {
+      votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
+    });
+    
+    // Encontrar a mais votada
+    let jantaVencedor = '-';
+    let jantaMaxVotos = 0;
+    Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
+      if (votos > jantaMaxVotos) {
+        jantaMaxVotos = votos;
+        jantaVencedor = opcao;
+      }
+    });
+    
+    document.getElementById('dashJantaVencedor').textContent = jantaVencedor;
+    document.getElementById('dashJantaVotos').textContent = `${jantaMaxVotos} voto${jantaMaxVotos !== 1 ? 's' : ''}`;
+    document.getElementById('dashJantaVencedor').style.color = '#ffd700';
+    document.getElementById('dashJantaVotos').style.color = '#ffd700';
+  } else {
+    // Contar votos da janta normalmente
+    let votosPorJanta = {};
+    let votantesJanta = new Set();
+    Object.values(votosJanta).forEach(voto => {
+      votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
+      votantesJanta.add(voto.jogador);
+    });
+    
+    // Janta mais votada
+    let jantaVencedor = '-';
+    let jantaMaxVotos = 0;
+    Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
+      if (votos > jantaMaxVotos) {
+        jantaMaxVotos = votos;
+        jantaVencedor = opcao;
+      }
+    });
+    document.getElementById('dashJantaVencedor').textContent = jantaVencedor;
+    document.getElementById('dashJantaVotos').textContent = `${jantaMaxVotos} voto${jantaMaxVotos !== 1 ? 's' : ''}`;
+    document.getElementById('dashJantaVencedor').style.color = '#fff';
+    document.getElementById('dashJantaVotos').style.color = '#d4a121';
+  }
   
   // Contar votos da mão
   let votosPorMao = {};
@@ -406,18 +654,6 @@ function atualizarDashboard() {
     votosPorMao[voto.opcao] = (votosPorMao[voto.opcao] || 0) + 1;
     votantesMao.add(voto.jogador);
   });
-  
-  // Janta mais votada
-  let jantaVencedor = '-';
-  let jantaMaxVotos = 0;
-  Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
-    if (votos > jantaMaxVotos) {
-      jantaMaxVotos = votos;
-      jantaVencedor = opcao;
-    }
-  });
-  document.getElementById('dashJantaVencedor').textContent = jantaVencedor;
-  document.getElementById('dashJantaVotos').textContent = `${jantaMaxVotos} voto${jantaMaxVotos !== 1 ? 's' : ''}`;
   
   // Mão mais votada
   let maoVencedor = '-';
@@ -432,7 +668,7 @@ function atualizarDashboard() {
   document.getElementById('dashMaoVotos').textContent = `${maoMaxVotos} voto${maoMaxVotos !== 1 ? 's' : ''}`;
   
   // Participação
-  const totalVotantes = new Set([...votantesJanta, ...votantesMao]).size;
+  const totalVotantes = new Set([...Object.values(votosJanta).map(v => v.jogador), ...Object.values(votosMao).map(v => v.jogador)]).size;
   const participacao = jogadores.length > 0 ? ((totalVotantes / jogadores.length) * 100).toFixed(1) : 0;
   document.getElementById('dashParticipacao').textContent = `${participacao}%`;
   document.getElementById('dashTotalVotos').textContent = `${totalVotantes} votante${totalVotantes !== 1 ? 's' : ''}`;
@@ -468,6 +704,15 @@ btnAcessarAdmin.onclick = () => {
   }
 };
 
+// Iniciar contador regressivo
+setInterval(atualizarContadorRegressivo, 60000);
+atualizarContadorRegressivo();
+
+// Atualizar status do prazo periodicamente
+setInterval(atualizarStatusPrazo, 60000);
+atualizarStatusPrazo();
+
 </script>
 </body>
+
 </html>
