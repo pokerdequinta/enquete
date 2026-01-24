@@ -63,6 +63,12 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 .modal-btn.confirm{background:#d4a121;color:#000}
 .modal-btn.cancel{background:#c72c48;color:#fff}
 
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(212, 161, 33, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(212, 161, 33, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(212, 161, 33, 0); }
+}
+
 @media(max-width:768px){
 .option-header{flex-direction:column;align-items:flex-start;gap:5px}
 .dashboard{grid-template-columns:1fr}
@@ -212,6 +218,7 @@ let modoAdmin = false;
 // FUNÇÃO PARA VERIFICAR PRAZO DE VOTAÇÃO (VERSÃO SIMPLIFICADA)
 function verificarPrazoVotacao() {
   // Data limite: 26 de janeiro de 2026 às 22:00
+  // MUDAR PARA 2026 SE PRECISAR
   const dataLimite = new Date('2026-01-26T22:00:00');
   const agora = new Date();
   
@@ -326,40 +333,103 @@ function atualizarStatusPrazo() {
   }
 }
 
-// FUNÇÃO PARA CONTADOR REGRESSIVO
+// FUNÇÃO PARA CONTADOR REGRESSIVO (CORRIGIDA)
 function atualizarContadorRegressivo() {
-  const dataLimite = new Date('2026-01-26T22:00:00');
+  // PARA TESTE - Use uma data futura próxima
+  // const dataLimite = new Date('2026-01-26T22:00:00'); // DATA ORIGINAL
+  const dataLimite = new Date(); // PARA TESTE: Use agora + 1 dia
+  dataLimite.setDate(dataLimite.getDate() + 1);
+  dataLimite.setHours(22, 0, 0, 0);
+  
   const agora = new Date();
   
-  if (agora < dataLimite && !verificarPrazoVotacao().expirado) {
-    const diff = dataLimite - agora;
-    const horas = Math.floor(diff / (1000 * 60 * 60));
-    const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    const contadorElement = document.createElement('div');
+  // Se já expirou, remove o contador
+  if (agora >= dataLimite) {
+    const contadorExistente = document.getElementById('contadorRegressivo');
+    if (contadorExistente) {
+      contadorExistente.remove();
+    }
+    return;
+  }
+  
+  const diff = dataLimite - agora;
+  const horas = Math.floor(diff / (1000 * 60 * 60));
+  const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const segundos = Math.floor((diff % (1000 * 60)) / 1000);
+  
+  // Criar ou atualizar contador
+  let contadorElement = document.getElementById('contadorRegressivo');
+  
+  if (!contadorElement) {
+    contadorElement = document.createElement('div');
     contadorElement.id = 'contadorRegressivo';
     contadorElement.style.cssText = `
-      background: rgba(212, 161, 33, 0.2);
+      background: linear-gradient(135deg, rgba(212, 161, 33, 0.3), rgba(180, 130, 20, 0.2));
       border: 2px solid #d4a121;
-      border-radius: 8px;
-      padding: 10px;
-      margin: 10px 0;
+      border-radius: 10px;
+      padding: 12px 15px;
+      margin: 15px 0;
       text-align: center;
       font-weight: bold;
-      color: #d4a121;
+      color: #ffd700;
+      font-size: 1.1em;
+      box-shadow: 0 2px 8px rgba(212, 161, 33, 0.3);
+      animation: pulse 2s infinite;
     `;
     
-    contadorElement.innerHTML = `⏳ Tempo restante para votar: ${horas}h ${minutos}m`;
-    
+    // Encontrar onde inserir (após o aviso da janta)
     const enqueteJanta = document.querySelector('.enquete-section:nth-child(3)');
-    const contadorExistente = document.getElementById('contadorRegressivo');
+    const avisoPrazo = enqueteJanta.querySelector('div[style*="background: rgba(212, 161, 33, 0.1)"]');
     
-    if (!contadorExistente && enqueteJanta) {
+    if (avisoPrazo && enqueteJanta) {
+      // Inserir após o aviso
+      avisoPrazo.parentNode.insertBefore(contadorElement, avisoPrazo.nextSibling);
+    } else if (enqueteJanta) {
+      // Inserir no início da seção
       enqueteJanta.insertBefore(contadorElement, enqueteJanta.children[2]);
-    } else if (contadorExistente) {
-      contadorExistente.innerHTML = `⏳ Tempo restante para votar: ${horas}h ${minutos}m`;
     }
   }
+  
+  // Formatar tempo
+  let tempoFormatado = '';
+  if (horas > 0) {
+    tempoFormatado = `${horas}h ${minutos}m ${segundos}s`;
+  } else if (minutos > 0) {
+    tempoFormatado = `${minutos}m ${segundos}s`;
+  } else {
+    tempoFormatado = `${segundos}s`;
+  }
+  
+  // Atualizar conteúdo
+  contadorElement.innerHTML = `
+    <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+      <span style="font-size: 1.3em;">⏳</span>
+      <span style="flex-grow: 1; text-align: center;">
+        <strong>TEMPO RESTANTE:</strong><br>
+        <span style="font-size: 1.2em; letter-spacing: 1px;">${tempoFormatado}</span>
+      </span>
+      <span style="font-size: 1.3em;">⏳</span>
+    </div>
+    <div style="margin-top: 5px; font-size: 0.85em; opacity: 0.9;">
+      Votação encerra: <strong>26/01/2026 às 22:00</strong>
+    </div>
+  `;
+  
+  // Mudar cor quando falta pouco tempo
+  if (horas < 24) {
+    contadorElement.style.background = 'linear-gradient(135deg, rgba(255, 87, 34, 0.3), rgba(213, 0, 0, 0.2))';
+    contadorElement.style.borderColor = '#ff5722';
+    contadorElement.style.color = '#ffcc00';
+  }
+  
+  if (horas < 6) {
+    contadorElement.style.background = 'linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(139, 0, 0, 0.2))';
+    contadorElement.style.borderColor = '#ff0000';
+    contadorElement.style.animation = 'pulse 1s infinite';
+  }
+  
+  // Para debug no console
+  console.log('Contador atualizado:', tempoFormatado);
 }
 
 try {
@@ -697,17 +767,44 @@ btnAcessarAdmin.onclick = () => {
   }
 };
 
-// Iniciar contador regressivo
-setInterval(atualizarContadorRegressivo, 60000);
-atualizarContadorRegressivo();
+// INICIAR CONTADOR REGRESSIVO (ATUALIZA A CADA SEGUNDO)
+setInterval(atualizarContadorRegressivo, 1000);
 
-// Atualizar status do prazo periodicamente
-setInterval(atualizarStatusPrazo, 60000);
-atualizarStatusPrazo();
+// EXECUTAR IMEDIATAMENTE
+setTimeout(() => {
+  atualizarContadorRegressivo();
+  console.log('Contador regressivo iniciado!');
+}, 1000);
+
+// TAMBÉM INICIAR QUANDO A PÁGINA CARREGAR COMPLETAMENTE
+window.addEventListener('load', () => {
+  setTimeout(atualizarContadorRegressivo, 500);
+});
+
+// PARA DEBUG: Botão para testar manualmente
+const testBtn = document.createElement('button');
+testBtn.textContent = '🔧 TESTAR CONTADOR';
+testBtn.style.cssText = `
+  position: fixed;
+  top: 50px;
+  right: 10px;
+  padding: 8px 12px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  z-index: 9999;
+  font-size: 0.8em;
+  cursor: pointer;
+  opacity: 0.7;
+`;
+testBtn.onclick = () => {
+  atualizarContadorRegressivo();
+  alert('Contador forçado! Verifique o console (F12)');
+};
+document.body.appendChild(testBtn);
 
 </script>
 </body>
 
 </html>
-
-
