@@ -209,29 +209,22 @@ let maoSelecionada = null;
 let jogadorAtual = null;
 let modoAdmin = false;
 
-// FUNÇÃO PARA VERIFICAR PRAZO DE VOTAÇÃO
+// FUNÇÃO PARA VERIFICAR PRAZO DE VOTAÇÃO (VERSÃO SIMPLIFICADA)
 function verificarPrazoVotacao() {
-  const dataLimite = new Date('2025-01-26T22:00:00');
+  // Data limite: 26 de janeiro de 2026 às 22:00
+  const dataLimite = new Date('2026-01-26T22:00:00');
   const agora = new Date();
   
-  // Se já passou da data limite
-  if (agora > dataLimite) {
+  // Só expira DEPOIS de 26/01/2026 22:00
+  if (agora >= dataLimite) {
     return {
       expirado: true,
       mensagem: '⏰ A votação da janta foi encerrada!',
-      motivo: 'Prazo finalizado'
+      motivo: 'Prazo finalizado em 26/01 às 22:00'
     };
   }
   
-  // Se for segunda-feira após 22:00 (mesmo antes da data limite)
-  if (agora.getDay() === 1 && agora.getHours() >= 22) {
-    return {
-      expirado: true,
-      mensagem: '⏰ A votação da janta foi encerrada!',
-      motivo: 'Segunda-feira após 22:00h'
-    };
-  }
-  
+  // Se não passou da data limite, NÃO expirou
   return { expirado: false };
 }
 
@@ -716,3 +709,4 @@ atualizarStatusPrazo();
 </body>
 
 </html>
+
