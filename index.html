@@ -218,7 +218,7 @@ let modoAdmin = false;
 // FUNÇÃO PARA VERIFICAR PRAZO DE VOTAÇÃO
 function verificarPrazoVotacao() {
   // Data limite: 26 de janeiro de 2026 às 22:00
-  const dataLimite = new Date('2026-01-26T22:00:00');
+  const dataLimite = new Date('2026-01-24T02:16:00');
   const agora = new Date();
   
   if (agora >= dataLimite) {
@@ -733,18 +733,11 @@ window.addEventListener('load', function() {
   console.log('Página carregada, iniciando contador...');
   iniciarContadorRegressivo();
   
-  // Botão de teste para verificar se funciona
-  const testBtn = document.createElement('button');
-  testBtn.textContent = 'TESTAR CONTADOR';
-  testBtn.style.cssText = 'position:fixed;bottom:60px;right:10px;padding:8px 12px;background:#2196F3;color:white;border:none;border-radius:5px;z-index:9999;font-size:0.8em;cursor:pointer;';
-  testBtn.onclick = function() {
-    iniciarContadorRegressivo();
-    alert('Contador reiniciado! Verifique se apareceu.');
-  };
-  document.body.appendChild(testBtn);
+
 });
 
 </script>
 </body>
 
 </html>
+
