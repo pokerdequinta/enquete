@@ -218,7 +218,7 @@ let modoAdmin = false;
 // FUNÇÃO PARA VERIFICAR PRAZO DE VOTAÇÃO
 function verificarPrazoVotacao() {
   // Data limite: 26 de janeiro de 2026 às 22:00
-  const dataLimite = new Date('2026-01-24T02:16:00');
+  const dataLimite = new Date('2026-01-26T22:00:00');
   const agora = new Date();
   
   if (agora >= dataLimite) {
@@ -361,7 +361,7 @@ function exibirJantaVencedora() {
     `;
     
     divVencedora.innerHTML = `
-      <div style="font-size: 2em; margin-bottom: 10px;">🎉</div>
+      <div style="font-size: 2em; margin-bottom: 10px;">🍽️</div>
       <div>${mensagemVencedora}</div>
       <div style="margin-top: 10px; font-size: 0.9em; opacity: 0.9;">
         Votação encerrada em ${prazo.motivo}
@@ -398,8 +398,8 @@ function atualizarStatusPrazo() {
       avisoPrazo.innerHTML = `
         <p style="margin-bottom: 10px; font-weight: bold; color: #ff6b6b;">⏰ VOTAÇÃO DA JANTA ENCERRADA</p>
         <p style="opacity: 0.9; line-height: 1.6;">
-          A votação foi encerrada em <strong>${prazo.motivo}</strong>.<br>
-          O Bruxo da Cozinha já está preparando a refeição vencedora! 🧙‍♂️👨‍🍳
+          A votação foi encerrada, <strong>${prazo.motivo}</strong>.<br>
+          O Bruxo da Cozinha vai fazer o corre e preparar o quitute vencedor! 🧙‍♂️👨‍🍳
         </p>
       `;
     }
@@ -740,4 +740,5 @@ window.addEventListener('load', function() {
 </body>
 
 </html>
+
 
