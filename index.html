@@ -258,7 +258,7 @@ function exibirJantaVencedora() {
     
     // Criar mensagem especial
     const mensagemVencedora = empate 
-      ? '🏆 EMPATE! Mais de uma opção recebeu o mesmo número de votos.'
+      ? '🏆 EMPATE! Mais de uma opção recebeu o mesmo número de votos, Organização Decidirá.'
       : `🏆 JANTA VENCEDORA: ${jantaVencedora} (${maxVotos} voto${maxVotos !== 1 ? 's' : ''})`;
     
     // Exibir em destaque
@@ -328,7 +328,7 @@ function atualizarStatusPrazo() {
 
 // FUNÇÃO PARA CONTADOR REGRESSIVO
 function atualizarContadorRegressivo() {
-  const dataLimite = new Date('2025-01-26T22:00:00');
+  const dataLimite = new Date('2026-01-26T22:00:00');
   const agora = new Date();
   
   if (agora < dataLimite && !verificarPrazoVotacao().expirado) {
@@ -709,4 +709,5 @@ atualizarStatusPrazo();
 </body>
 
 </html>
+
 
