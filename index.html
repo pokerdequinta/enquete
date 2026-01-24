@@ -63,12 +63,6 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 .modal-btn.confirm{background:#d4a121;color:#000}
 .modal-btn.cancel{background:#c72c48;color:#fff}
 
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(212, 161, 33, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(212, 161, 33, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(212, 161, 33, 0); }
-}
-
 @media(max-width:768px){
 .option-header{flex-direction:column;align-items:flex-start;gap:5px}
 .dashboard{grid-template-columns:1fr}
@@ -121,12 +115,18 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 </div>
 
 <!-- ENQUETE 1: JANTA -->
-<div class="enquete-section">
+<div class="enquete-section" id="enqueteJanta">
 <h2>🍽️ ENQUETE: JANTA</h2>
-<div style="background: rgba(212, 161, 33, 0.1); border: 2px dashed #d4a121; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+<div style="background: rgba(212, 161, 33, 0.1); border: 2px dashed #d4a121; border-radius: 10px; padding: 15px; margin-bottom: 20px;" id="avisoJanta">
 <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">⏰ Votação encerra Segunda-feira às 22:00</p>
 <p style="opacity: 0.9; line-height: 1.6;">O prazo é necessário para que nosso lendário <strong>Bruxo da Cozinha</strong> 🧙‍♂️ possa preparar a deliciosa janta que todos merecem! Quanto mais cedo você votar, melhor será o resultado.</p>
 </div>
+
+<!-- CONTADOR REGRESSIVO - VAI APARECER AQUI -->
+<div id="contadorRegressivoContainer" style="display: none;">
+  <!-- O contador será inserido aqui pelo JavaScript -->
+</div>
+
 <p style="margin-bottom:20px;opacity:0.9">Escolha sua opção preferida para a janta:</p>
 <div id="jantaOptions"></div>
 <button class="vote-btn" id="btnVotarJanta" disabled>VOTAR NA JANTA</button>
@@ -215,14 +215,12 @@ let maoSelecionada = null;
 let jogadorAtual = null;
 let modoAdmin = false;
 
-// FUNÇÃO PARA VERIFICAR PRAZO DE VOTAÇÃO (VERSÃO SIMPLIFICADA)
+// FUNÇÃO PARA VERIFICAR PRAZO DE VOTAÇÃO
 function verificarPrazoVotacao() {
   // Data limite: 26 de janeiro de 2026 às 22:00
-  // MUDAR PARA 2026 SE PRECISAR
   const dataLimite = new Date('2026-01-26T22:00:00');
   const agora = new Date();
   
-  // Só expira DEPOIS de 26/01/2026 22:00
   if (agora >= dataLimite) {
     return {
       expirado: true,
@@ -231,8 +229,91 @@ function verificarPrazoVotacao() {
     };
   }
   
-  // Se não passou da data limite, NÃO expirou
   return { expirado: false };
+}
+
+// FUNÇÃO SIMPLES PARA CONTADOR REGRESSIVO
+function iniciarContadorRegressivo() {
+  const container = document.getElementById('contadorRegressivoContainer');
+  
+  // Para TESTE: usar amanhã às 22:00
+  const dataLimite = new Date();
+  dataLimite.setDate(dataLimite.getDate() + 1); // Amanhã
+  dataLimite.setHours(22, 0, 0, 0); // 22:00
+  
+  // Para produção: usar a data real
+  // const dataLimite = new Date('2026-01-26T22:00:00');
+  
+  function atualizarContador() {
+    const agora = new Date();
+    const diff = dataLimite - agora;
+    
+    if (diff <= 0) {
+      container.innerHTML = `
+        <div style="background: rgba(139, 0, 0, 0.3); border: 2px solid #ff0000; border-radius: 10px; padding: 12px; margin: 15px 0; text-align: center;">
+          <div style="font-weight: bold; color: #ff6b6b; font-size: 1.1em;">⏰ VOTAÇÃO ENCERRADA</div>
+          <div style="margin-top: 5px; font-size: 0.9em;">Prazo finalizado em 26/01 às 22:00</div>
+        </div>
+      `;
+      return;
+    }
+    
+    const horas = Math.floor(diff / (1000 * 60 * 60));
+    const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const segundos = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    // Determinar cor com base no tempo
+    let corFundo, corBorda, corTexto;
+    
+    if (horas > 24) {
+      corFundo = 'rgba(212, 161, 33, 0.2)';
+      corBorda = '#d4a121';
+      corTexto = '#ffd700';
+    } else if (horas > 6) {
+      corFundo = 'rgba(255, 152, 0, 0.2)';
+      corBorda = '#ff9800';
+      corTexto = '#ffcc80';
+    } else {
+      corFundo = 'rgba(244, 67, 54, 0.2)';
+      corBorda = '#f44336';
+      corTexto = '#ffab91';
+    }
+    
+    container.style.display = 'block';
+    container.innerHTML = `
+      <div style="background: ${corFundo}; border: 2px solid ${corBorda}; border-radius: 10px; padding: 12px; margin: 15px 0; text-align: center; animation: pulse 2s infinite;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+          <span style="font-size: 1.3em;">⏳</span>
+          <span style="flex-grow: 1; text-align: center;">
+            <strong style="color: ${corTexto};">TEMPO RESTANTE:</strong><br>
+            <span style="font-size: 1.2em; letter-spacing: 1px; color: ${corTexto};">${horas}h ${minutos}m ${segundos}s</span>
+          </span>
+          <span style="font-size: 1.3em;">⏳</span>
+        </div>
+        <div style="margin-top: 5px; font-size: 0.85em; opacity: 0.9;">
+          Votação encerra: <strong>26/01/2026 às 22:00</strong>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Adicionar estilo de animação
+  if (!document.querySelector('#contadorStyle')) {
+    const style = document.createElement('style');
+    style.id = 'contadorStyle';
+    style.textContent = `
+      @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(212, 161, 33, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(212, 161, 33, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(212, 161, 33, 0); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  // Atualizar a cada segundo
+  atualizarContador();
+  setInterval(atualizarContador, 1000);
 }
 
 // FUNÇÃO PARA EXIBIR JANTA VENCEDORA
@@ -242,13 +323,11 @@ function exibirJantaVencedora() {
   const resultsList = document.getElementById('jantaResultsList');
   
   if (prazo.expirado) {
-    // Calcular a janta mais votada
     let votosPorJanta = {};
     Object.values(votosJanta).forEach(voto => {
       votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
     });
     
-    // Encontrar a mais votada
     let jantaVencedora = '-';
     let maxVotos = 0;
     let empate = false;
@@ -263,12 +342,10 @@ function exibirJantaVencedora() {
       }
     });
     
-    // Criar mensagem especial
     const mensagemVencedora = empate 
       ? '🏆 EMPATE! Mais de uma opção recebeu o mesmo número de votos, Organização Decidirá.'
       : `🏆 JANTA VENCEDORA: ${jantaVencedora} (${maxVotos} voto${maxVotos !== 1 ? 's' : ''})`;
     
-    // Exibir em destaque
     const divVencedora = document.createElement('div');
     divVencedora.style.cssText = `
       background: linear-gradient(135deg, #d4a121, #b8860b);
@@ -291,19 +368,16 @@ function exibirJantaVencedora() {
       </div>
     `;
     
-    // Inserir no topo dos resultados
     if (resultsList.firstChild) {
       resultsList.insertBefore(divVencedora, resultsList.firstChild);
     } else {
       resultsList.appendChild(divVencedora);
     }
     
-    // Desabilitar botão de votar na janta
     btnVotarJanta.disabled = true;
     btnVotarJanta.textContent = '⏰ VOTAÇÃO ENCERRADA';
     btnVotarJanta.style.background = '#666';
     
-    // Atualizar dashboard com a vencedora
     document.getElementById('dashJantaVencedor').textContent = jantaVencedora;
     document.getElementById('dashJantaVotos').textContent = `${maxVotos} voto${maxVotos !== 1 ? 's' : ''}`;
   }
@@ -319,8 +393,7 @@ function atualizarStatusPrazo() {
     statusElement.style.background = '#8b0000';
     statusElement.style.borderColor = '#ff0000';
     
-    // Adicionar aviso na seção da janta
-    const avisoPrazo = document.querySelector('.enquete-section:nth-child(3) > div');
+    const avisoPrazo = document.getElementById('avisoJanta');
     if (avisoPrazo) {
       avisoPrazo.innerHTML = `
         <p style="margin-bottom: 10px; font-weight: bold; color: #ff6b6b;">⏰ VOTAÇÃO DA JANTA ENCERRADA</p>
@@ -331,105 +404,6 @@ function atualizarStatusPrazo() {
       `;
     }
   }
-}
-
-// FUNÇÃO PARA CONTADOR REGRESSIVO (CORRIGIDA)
-function atualizarContadorRegressivo() {
-  // PARA TESTE - Use uma data futura próxima
-  // const dataLimite = new Date('2026-01-26T22:00:00'); // DATA ORIGINAL
-  const dataLimite = new Date(); // PARA TESTE: Use agora + 1 dia
-  dataLimite.setDate(dataLimite.getDate() + 1);
-  dataLimite.setHours(22, 0, 0, 0);
-  
-  const agora = new Date();
-  
-  // Se já expirou, remove o contador
-  if (agora >= dataLimite) {
-    const contadorExistente = document.getElementById('contadorRegressivo');
-    if (contadorExistente) {
-      contadorExistente.remove();
-    }
-    return;
-  }
-  
-  const diff = dataLimite - agora;
-  const horas = Math.floor(diff / (1000 * 60 * 60));
-  const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const segundos = Math.floor((diff % (1000 * 60)) / 1000);
-  
-  // Criar ou atualizar contador
-  let contadorElement = document.getElementById('contadorRegressivo');
-  
-  if (!contadorElement) {
-    contadorElement = document.createElement('div');
-    contadorElement.id = 'contadorRegressivo';
-    contadorElement.style.cssText = `
-      background: linear-gradient(135deg, rgba(212, 161, 33, 0.3), rgba(180, 130, 20, 0.2));
-      border: 2px solid #d4a121;
-      border-radius: 10px;
-      padding: 12px 15px;
-      margin: 15px 0;
-      text-align: center;
-      font-weight: bold;
-      color: #ffd700;
-      font-size: 1.1em;
-      box-shadow: 0 2px 8px rgba(212, 161, 33, 0.3);
-      animation: pulse 2s infinite;
-    `;
-    
-    // Encontrar onde inserir (após o aviso da janta)
-    const enqueteJanta = document.querySelector('.enquete-section:nth-child(3)');
-    const avisoPrazo = enqueteJanta.querySelector('div[style*="background: rgba(212, 161, 33, 0.1)"]');
-    
-    if (avisoPrazo && enqueteJanta) {
-      // Inserir após o aviso
-      avisoPrazo.parentNode.insertBefore(contadorElement, avisoPrazo.nextSibling);
-    } else if (enqueteJanta) {
-      // Inserir no início da seção
-      enqueteJanta.insertBefore(contadorElement, enqueteJanta.children[2]);
-    }
-  }
-  
-  // Formatar tempo
-  let tempoFormatado = '';
-  if (horas > 0) {
-    tempoFormatado = `${horas}h ${minutos}m ${segundos}s`;
-  } else if (minutos > 0) {
-    tempoFormatado = `${minutos}m ${segundos}s`;
-  } else {
-    tempoFormatado = `${segundos}s`;
-  }
-  
-  // Atualizar conteúdo
-  contadorElement.innerHTML = `
-    <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-      <span style="font-size: 1.3em;">⏳</span>
-      <span style="flex-grow: 1; text-align: center;">
-        <strong>TEMPO RESTANTE:</strong><br>
-        <span style="font-size: 1.2em; letter-spacing: 1px;">${tempoFormatado}</span>
-      </span>
-      <span style="font-size: 1.3em;">⏳</span>
-    </div>
-    <div style="margin-top: 5px; font-size: 0.85em; opacity: 0.9;">
-      Votação encerra: <strong>26/01/2026 às 22:00</strong>
-    </div>
-  `;
-  
-  // Mudar cor quando falta pouco tempo
-  if (horas < 24) {
-    contadorElement.style.background = 'linear-gradient(135deg, rgba(255, 87, 34, 0.3), rgba(213, 0, 0, 0.2))';
-    contadorElement.style.borderColor = '#ff5722';
-    contadorElement.style.color = '#ffcc00';
-  }
-  
-  if (horas < 6) {
-    contadorElement.style.background = 'linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(139, 0, 0, 0.2))';
-    contadorElement.style.borderColor = '#ff0000';
-    contadorElement.style.animation = 'pulse 1s infinite';
-  }
-  
-  // Para debug no console
-  console.log('Contador atualizado:', tempoFormatado);
 }
 
 try {
@@ -455,6 +429,12 @@ try {
   console.error(e);
 }
 
+// INICIAR CONTADOR REGRESSIVO IMEDIATAMENTE
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM carregado, iniciando contador...');
+  iniciarContadorRegressivo();
+});
+
 // Preencher select de jogadores
 const selectJogador = document.getElementById('playerSelect');
 jogadores.sort().forEach(j => {
@@ -478,14 +458,11 @@ function renderizarOpcoes(tipo) {
   const resultsContainer = document.getElementById(tipo + 'Results');
   const resultsList = document.getElementById(tipo + 'ResultsList');
   
-  // Limpar resultados anteriores
   resultsList.innerHTML = '';
   
-  // Para a enquete da janta, verificar se expirou
   if (tipo === 'janta') {
     const prazo = verificarPrazoVotacao();
     if (prazo.expirado) {
-      // Desabilitar todas as opções
       opcoes.forEach(opcao => {
         const div = document.createElement('div');
         div.className = 'vote-option';
@@ -512,7 +489,6 @@ function renderizarOpcoes(tipo) {
         container.appendChild(div);
       });
       
-      // Exibir a janta vencedora
       exibirJantaVencedora();
       resultsContainer.style.display = 'block';
       return;
@@ -523,7 +499,6 @@ function renderizarOpcoes(tipo) {
   let votosPorOpcao = {};
   let votantesPorOpcao = {};
   
-  // Contar votos
   Object.values(votos).forEach(voto => {
     totalVotos++;
     votosPorOpcao[voto.opcao] = (votosPorOpcao[voto.opcao] || 0) + 1;
@@ -531,7 +506,6 @@ function renderizarOpcoes(tipo) {
     votantesPorOpcao[voto.opcao].push(voto.jogador);
   });
   
-  // Verificar se jogador já votou
   let jaVotou = false;
   let votoAnterior = null;
   Object.entries(votos).forEach(([key, voto]) => {
@@ -588,7 +562,6 @@ function renderizarOpcoes(tipo) {
     container.appendChild(div);
   });
   
-  // Mostrar resultados se houver votos
   if (totalVotos > 0) {
     resultsContainer.style.display = 'block';
     const ordenado = Object.entries(votosPorOpcao).sort((a, b) => b[1] - a[1]);
@@ -604,14 +577,12 @@ function renderizarOpcoes(tipo) {
 btnVotarJanta.onclick = async () => {
   if (!jogadorAtual || !jantaSelecionada) return;
   
-  // VERIFICAÇÃO DO PRAZO
   const prazo = verificarPrazoVotacao();
   if (prazo.expirado) {
     alert(`❌ ${prazo.mensagem}\n${prazo.motivo}`);
     return;
   }
   
-  // Verificar se já votou e remover voto anterior
   const votosRef = ref(db, 'enquetes/janta');
   const snapshot = await get(votosRef);
   if (snapshot.exists()) {
@@ -623,7 +594,6 @@ btnVotarJanta.onclick = async () => {
     }
   }
   
-  // Registrar novo voto
   await push(ref(db, 'enquetes/janta'), {
     jogador: jogadorAtual,
     opcao: jantaSelecionada,
@@ -638,7 +608,6 @@ btnVotarJanta.onclick = async () => {
 btnVotarMao.onclick = async () => {
   if (!jogadorAtual || !maoSelecionada) return;
   
-  // Verificar se já votou e remover voto anterior
   const votosRef = ref(db, 'enquetes/mao');
   const snapshot = await get(votosRef);
   if (snapshot.exists()) {
@@ -650,7 +619,6 @@ btnVotarMao.onclick = async () => {
     }
   }
   
-  // Registrar novo voto
   await push(ref(db, 'enquetes/mao'), {
     jogador: jogadorAtual,
     opcao: maoSelecionada,
@@ -665,14 +633,12 @@ btnVotarMao.onclick = async () => {
 function atualizarDashboard() {
   const prazo = verificarPrazoVotacao();
   
-  // Se a votação da janta expirou, exibir a vencedora no dashboard
   if (prazo.expirado) {
     let votosPorJanta = {};
     Object.values(votosJanta).forEach(voto => {
       votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
     });
     
-    // Encontrar a mais votada
     let jantaVencedor = '-';
     let jantaMaxVotos = 0;
     Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
@@ -687,7 +653,6 @@ function atualizarDashboard() {
     document.getElementById('dashJantaVencedor').style.color = '#ffd700';
     document.getElementById('dashJantaVotos').style.color = '#ffd700';
   } else {
-    // Contar votos da janta normalmente
     let votosPorJanta = {};
     let votantesJanta = new Set();
     Object.values(votosJanta).forEach(voto => {
@@ -695,7 +660,6 @@ function atualizarDashboard() {
       votantesJanta.add(voto.jogador);
     });
     
-    // Janta mais votada
     let jantaVencedor = '-';
     let jantaMaxVotos = 0;
     Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
@@ -710,7 +674,6 @@ function atualizarDashboard() {
     document.getElementById('dashJantaVotos').style.color = '#d4a121';
   }
   
-  // Contar votos da mão
   let votosPorMao = {};
   let votantesMao = new Set();
   Object.values(votosMao).forEach(voto => {
@@ -718,7 +681,6 @@ function atualizarDashboard() {
     votantesMao.add(voto.jogador);
   });
   
-  // Mão mais votada
   let maoVencedor = '-';
   let maoMaxVotos = 0;
   Object.entries(votosPorMao).forEach(([opcao, votos]) => {
@@ -730,7 +692,6 @@ function atualizarDashboard() {
   document.getElementById('dashMaoVencedor').textContent = maoVencedor;
   document.getElementById('dashMaoVotos').textContent = `${maoMaxVotos} voto${maoMaxVotos !== 1 ? 's' : ''}`;
   
-  // Participação
   const totalVotantes = new Set([...Object.values(votosJanta).map(v => v.jogador), ...Object.values(votosMao).map(v => v.jogador)]).size;
   const participacao = jogadores.length > 0 ? ((totalVotantes / jogadores.length) * 100).toFixed(1) : 0;
   document.getElementById('dashParticipacao').textContent = `${participacao}%`;
@@ -767,42 +728,21 @@ btnAcessarAdmin.onclick = () => {
   }
 };
 
-// INICIAR CONTADOR REGRESSIVO (ATUALIZA A CADA SEGUNDO)
-setInterval(atualizarContadorRegressivo, 1000);
-
-// EXECUTAR IMEDIATAMENTE
-setTimeout(() => {
-  atualizarContadorRegressivo();
-  console.log('Contador regressivo iniciado!');
-}, 1000);
-
-// TAMBÉM INICIAR QUANDO A PÁGINA CARREGAR COMPLETAMENTE
-window.addEventListener('load', () => {
-  setTimeout(atualizarContadorRegressivo, 500);
+// Garantir que o contador seja iniciado
+window.addEventListener('load', function() {
+  console.log('Página carregada, iniciando contador...');
+  iniciarContadorRegressivo();
+  
+  // Botão de teste para verificar se funciona
+  const testBtn = document.createElement('button');
+  testBtn.textContent = 'TESTAR CONTADOR';
+  testBtn.style.cssText = 'position:fixed;bottom:60px;right:10px;padding:8px 12px;background:#2196F3;color:white;border:none;border-radius:5px;z-index:9999;font-size:0.8em;cursor:pointer;';
+  testBtn.onclick = function() {
+    iniciarContadorRegressivo();
+    alert('Contador reiniciado! Verifique se apareceu.');
+  };
+  document.body.appendChild(testBtn);
 });
-
-// PARA DEBUG: Botão para testar manualmente
-const testBtn = document.createElement('button');
-testBtn.textContent = '🔧 TESTAR CONTADOR';
-testBtn.style.cssText = `
-  position: fixed;
-  top: 50px;
-  right: 10px;
-  padding: 8px 12px;
-  background: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  z-index: 9999;
-  font-size: 0.8em;
-  cursor: pointer;
-  opacity: 0.7;
-`;
-testBtn.onclick = () => {
-  atualizarContadorRegressivo();
-  alert('Contador forçado! Verifique o console (F12)');
-};
-document.body.appendChild(testBtn);
 
 </script>
 </body>
