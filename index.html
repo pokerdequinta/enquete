@@ -238,7 +238,7 @@ function iniciarContadorRegressivo() {
   
   // Para TESTE: usar amanhã às 22:00
   const dataLimite = new Date();
-  dataLimite.setDate(dataLimite.getDate() + 0); // Amanhã
+  dataLimite.setDate(dataLimite.getDate() + 1); // Amanhã
   dataLimite.setHours(22, 0, 0, 0); // 22:00
   
   // Para produção: usar a data real
@@ -740,6 +740,7 @@ window.addEventListener('load', function() {
 </body>
 
 </html>
+
 
 
 
