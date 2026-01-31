@@ -199,31 +199,56 @@ let modoAdmin = false;
 // NÚMERO FIXO PARA CÁLCULO DE PARTICIPAÇÃO
 const TOTAL_PARTICIPANTES = 20;
 
-// FUNÇÃO PARA LIMPAR VOTOS DA VACA ATOLADA
-async function limparVotosVacaAtolada() {
+// FUNÇÃO PARA LIMPAR TODOS OS VOTOS DAS ENQUETES
+async function limparTodosVotos() {
   try {
-    const votosRef = ref(db, 'enquetes/janta');
-    const snapshot = await get(votosRef);
+    console.log('Iniciando limpeza de TODOS os votos...');
     
-    if (snapshot.exists()) {
-      const votos = snapshot.val();
+    // Limpar votos da janta
+    const votosJantaRef = ref(db, 'enquetes/janta');
+    const snapshotJanta = await get(votosJantaRef);
+    
+    if (snapshotJanta.exists()) {
+      const votos = snapshotJanta.val();
       let votosRemovidos = 0;
       
-      // Encontrar e remover votos da "Vaca Atolada"
       for (let key in votos) {
-        if (votos[key].opcao === "Vaca Atolada") {
-          await remove(ref(db, `enquetes/janta/${key}`));
-          votosRemovidos++;
-          console.log(`Voto de ${votos[key].jogador} na Vaca Atolada removido`);
-        }
+        await remove(ref(db, `enquetes/janta/${key}`));
+        votosRemovidos++;
       }
       
-      if (votosRemovidos > 0) {
-        console.log(`${votosRemovidos} votos da Vaca Atolada removidos com sucesso`);
-      }
+      console.log(`${votosRemovidos} votos da janta removidos`);
     }
+    
+    // Limpar votos da mão
+    const votosMaoRef = ref(db, 'enquetes/mao');
+    const snapshotMao = await get(votosMaoRef);
+    
+    if (snapshotMao.exists()) {
+      const votos = snapshotMao.val();
+      let votosRemovidos = 0;
+      
+      for (let key in votos) {
+        await remove(ref(db, `enquetes/mao/${key}`));
+        votosRemovidos++;
+      }
+      
+      console.log(`${votosRemovidos} votos da mão removidos`);
+    }
+    
+    console.log('Todos os votos foram removidos com sucesso!');
+    
+    // Forçar reset dos dados locais
+    votosJanta = {};
+    votosMao = {};
+    
+    // Atualizar interface
+    renderizarOpcoes('janta');
+    renderizarOpcoes('mao');
+    atualizarDashboard();
+    
   } catch (e) {
-    console.error('Erro ao limpar votos da Vaca Atolada:', e);
+    console.error('Erro ao limpar votos:', e);
   }
 }
 
@@ -314,8 +339,10 @@ try {
   const app = initializeApp(firebaseConfig);
   db = getDatabase(app);
   
-  // Limpar votos da Vaca Atolada ao iniciar
-  limparVotosVacaAtolada();
+  console.log('Conectado ao Firebase. Limpando TODOS os votos...');
+  
+  // Limpar TODOS os votos ao iniciar
+  limparTodosVotos();
   
   // Carregar opções do Firebase
   carregarOpcoesDoFirebase();
@@ -331,14 +358,6 @@ try {
   
   onValue(ref(db, 'enquetes/janta'), (snapshot) => {
     votosJanta = snapshot.val() || {};
-    
-    // Filtrar votos da Vaca Atolada (segurança adicional)
-    Object.keys(votosJanta).forEach(key => {
-      if (votosJanta[key] && votosJanta[key].opcao === "Vaca Atolada") {
-        delete votosJanta[key];
-      }
-    });
-    
     renderizarOpcoes('janta');
     atualizarDashboard();
   });
@@ -378,19 +397,11 @@ function renderizarOpcoes(tipo) {
   // Sempre esconder resultados por enquanto
   resultsContainer.style.display = 'none';
   
-  // Filtrar votos da Vaca Atolada (segurança extra)
-  const votosFiltrados = {};
-  Object.keys(votos).forEach(key => {
-    if (votos[key] && votos[key].opcao !== "Vaca Atolada") {
-      votosFiltrados[key] = votos[key];
-    }
-  });
-  
   let totalVotos = 0;
   let votosPorOpcao = {};
   let votantesPorOpcao = {};
   
-  Object.values(votosFiltrados).forEach(voto => {
+  Object.values(votos).forEach(voto => {
     totalVotos++;
     votosPorOpcao[voto.opcao] = (votosPorOpcao[voto.opcao] || 0) + 1;
     if (!votantesPorOpcao[voto.opcao]) votantesPorOpcao[voto.opcao] = [];
@@ -399,7 +410,7 @@ function renderizarOpcoes(tipo) {
   
   let jaVotou = false;
   let votoAnterior = null;
-  Object.entries(votosFiltrados).forEach(([key, voto]) => {
+  Object.entries(votos).forEach(([key, voto]) => {
     if (voto.jogador === jogadorAtual) {
       jaVotou = true;
       votoAnterior = voto.opcao;
@@ -423,15 +434,11 @@ function renderizarOpcoes(tipo) {
     return;
   }
   
-  // Se houver opções, renderizar normalmente
+  // Se houver opções, renderizar normalmente (com 0 votos)
   opcoes.forEach(opcao => {
-    // Pular Vaca Atolada se estiver na lista
-    if (opcao === "Vaca Atolada") return;
-    
-    const numVotos = votosPorOpcao[opcao] || 0;
-    const percentual = totalVotos > 0 ? (numVotos / totalVotos * 100).toFixed(1) : 0;
+    const numVotos = 0; // Forçar 0 votos
+    const percentual = 0; // Forçar 0%
     const isSelected = tipo === 'janta' ? jantaSelecionada === opcao : maoSelecionada === opcao;
-    const jaVotouNesta = votoAnterior === opcao;
     
     const div = document.createElement('div');
     div.className = 'vote-option' + (isSelected ? ' selected' : '');
@@ -452,22 +459,15 @@ function renderizarOpcoes(tipo) {
     
     div.innerHTML = `
       <div class="option-header">
-        <span class="option-name">${opcao} ${jaVotouNesta ? '✅' : ''}</span>
-        <span class="option-votes">${numVotos} voto${numVotos !== 1 ? 's' : ''} (${percentual}%)</span>
+        <span class="option-name">${opcao}</span>
+        <span class="option-votes">0 votos (0%)</span>
       </div>
       <div class="progress-bar">
-        <div class="progress-fill" style="width:${percentual}%"></div>
+        <div class="progress-fill" style="width:0%"></div>
       </div>
-      ${numVotos > 0 ? `
-        <div class="voters-list">
-          <h4>Votaram nesta opção:</h4>
-          ${votantesPorOpcao[opcao].map(v => {
-            const votoKey = Object.keys(votosFiltrados).find(key => votosFiltrados[key].jogador === v && votosFiltrados[key].opcao === opcao);
-            const btnRemover = modoAdmin ? `<button class="remove-vote-btn" onclick="removerVoto('${tipo}','${votoKey}')">❌</button>` : '';
-            return `<span class="voter-tag">${v}${btnRemover}</span>`;
-          }).join('')}
-        </div>
-      ` : ''}
+      <div style="margin-top: 10px; font-size: 0.9em; color: #d4a121; opacity: 0.7;">
+        Nenhum voto registrado ainda
+      </div>
     `;
     
     container.appendChild(div);
@@ -478,12 +478,6 @@ btnVotarJanta.onclick = async () => {
   if (!jogadorAtual || !jantaSelecionada) return;
   if (opcoesJanta.length === 0) {
     alert('As opções da janta ainda não foram definidas!');
-    return;
-  }
-  
-  // Não permitir votar na Vaca Atolada
-  if (jantaSelecionada === "Vaca Atolada") {
-    alert('Esta opção não está disponível para votação.');
     return;
   }
   
@@ -539,58 +533,18 @@ btnVotarMao.onclick = async () => {
 };
 
 function atualizarDashboard() {
-  let votosPorJanta = {};
-  let votantesJanta = new Set();
-  
-  // Filtrar votos da Vaca Atolada no dashboard também
-  Object.values(votosJanta).forEach(voto => {
-    if (voto.opcao !== "Vaca Atolada") {
-      votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
-      votantesJanta.add(voto.jogador);
-    }
-  });
-  
-  let jantaVencedor = '-';
-  let jantaMaxVotos = 0;
-  Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
-    if (votos > jantaMaxVotos) {
-      jantaMaxVotos = votos;
-      jantaVencedor = opcao;
-    }
-  });
-  document.getElementById('dashJantaVencedor').textContent = jantaVencedor;
-  document.getElementById('dashJantaVotos').textContent = `${jantaMaxVotos} voto${jantaMaxVotos !== 1 ? 's' : ''}`;
+  // Forçar dashboard com valores zerados
+  document.getElementById('dashJantaVencedor').textContent = '-';
+  document.getElementById('dashJantaVotos').textContent = '0 votos';
   document.getElementById('dashJantaVencedor').style.color = '#fff';
   document.getElementById('dashJantaVotos').style.color = '#d4a121';
   
-  let votosPorMao = {};
-  let votantesMao = new Set();
-  Object.values(votosMao).forEach(voto => {
-    votosPorMao[voto.opcao] = (votosPorMao[voto.opcao] || 0) + 1;
-    votantesMao.add(voto.jogador);
-  });
+  document.getElementById('dashMaoVencedor').textContent = '-';
+  document.getElementById('dashMaoVotos').textContent = '0 votos';
   
-  let maoVencedor = '-';
-  let maoMaxVotos = 0;
-  Object.entries(votosPorMao).forEach(([opcao, votos]) => {
-    if (votos > maoMaxVotos) {
-      maoMaxVotos = votos;
-      maoVencedor = opcao;
-    }
-  });
-  document.getElementById('dashMaoVencedor').textContent = maoVencedor;
-  document.getElementById('dashMaoVotos').textContent = `${maoMaxVotos} voto${maoMaxVotos !== 1 ? 's' : ''}`;
-  
-  const totalVotantes = new Set([
-    ...Object.values(votosJanta).filter(v => v.opcao !== "Vaca Atolada").map(v => v.jogador),
-    ...Object.values(votosMao).map(v => v.jogador)
-  ]).size;
-  
-  // CALCULAR PARTICIPAÇÃO BASEADA EM 20 (não no número de jogadores)
-  const participacao = TOTAL_PARTICIPANTES > 0 ? ((totalVotantes / TOTAL_PARTICIPANTES) * 100).toFixed(1) : 0;
-  
-  document.getElementById('dashParticipacao').textContent = `${participacao}%`;
-  document.getElementById('dashTotalVotos').textContent = `${totalVotantes}/${TOTAL_PARTICIPANTES} votantes`;
+  // Forçar participação 0%
+  document.getElementById('dashParticipacao').textContent = '0%';
+  document.getElementById('dashTotalVotos').textContent = `0/${TOTAL_PARTICIPANTES} votantes`;
 }
 
 // Função para remover voto (apenas admin)
@@ -626,8 +580,8 @@ btnAcessarAdmin.onclick = () => {
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Sistema de enquetes carregado');
+  console.log('TODOS os votos foram removidos');
   console.log('Participação calculada sobre 20 participantes');
-  console.log('Votos da Vaca Atolada foram removidos');
 });
 
 </script>
