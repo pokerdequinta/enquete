@@ -72,7 +72,7 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 
 <body>
 
-<div class="status-indicator" id="statusIndicator">🔄 Conectando...</div>
+<div class="status-indicator connected" id="statusIndicator">✅ Conectado</div>
 
 <div class="logo-top">
 <img src="logo pdq.png" onerror="this.style.display='none'">
@@ -118,18 +118,14 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 <div class="enquete-section" id="enqueteJanta">
 <h2>🍽️ ENQUETE: JANTA</h2>
 <div style="background: rgba(212, 161, 33, 0.1); border: 2px dashed #d4a121; border-radius: 10px; padding: 15px; margin-bottom: 20px;" id="avisoJanta">
-<p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">⏰ Votação encerra Segunda-feira às 22:00</p>
-<p style="opacity: 0.9; line-height: 1.6;">O prazo é necessário para que nosso lendário <strong>Bruxo da Cozinha</strong> 🧙‍♂️ possa preparar a deliciosa janta que todos merecem! Quanto mais cedo você votar, melhor será a organização.</p>
-</div>
-
-<!-- CONTADOR REGRESSIVO - VAI APARECER AQUI -->
-<div id="contadorRegressivoContainer" style="display: none;">
-  <!-- O contador será inserido aqui pelo JavaScript -->
+<p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
+<p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a próxima votação da janta. Assim que as opções forem definidas, você poderá votar aqui!</p>
+<p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">⏰ O prazo de votação será exibido quando as opções estiverem disponíveis.</p>
 </div>
 
 <p style="margin-bottom:20px;opacity:0.9">Escolha sua opção preferida para a janta:</p>
 <div id="jantaOptions"></div>
-<button class="vote-btn" id="btnVotarJanta" disabled>VOTAR NA JANTA</button>
+<button class="vote-btn" id="btnVotarJanta" disabled style="background: #666; cursor: not-allowed;">AGUARDANDO OPÇÕES</button>
 <div class="results-section" id="jantaResults" style="display:none">
 <h3 style="color:#d4a121;margin-bottom:15px">📊 Resultados</h3>
 <div id="jantaResultsList"></div>
@@ -139,14 +135,14 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 <!-- ENQUETE 2: MÃO DA ETAPA -->
 <div class="enquete-section">
 <h2>🎴 ENQUETE: MÃO DA ETAPA</h2>
-<div style="background: rgba(212, 161, 33, 0.1); border: 2px dashed #d4a121; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
-<p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">🎰 A Mão da Etapa ativa a Roleta da Sorte!</p>
-<p style="opacity: 0.9; line-height: 1.6;">Quem <strong>ganhar a mão</strong> com as cartas escolhidas e tiver <strong>showdown</strong> fica elegível a girar a <strong>Roleta da Sorte</strong> 🎡 e concorrer a prêmios especiais!</p>
-<p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">📋 Para mais informações, <a href="https://pokerdequinta.github.io/regulamento/" style="color: #d4a121; font-weight: bold; text-decoration: underline;">Leia o Regulamento</a></p>
+<div style="background: rgba(212, 161, 33, 0.1); border: 2px dashed #d4a121; border-radius: 10px; padding: 15px; margin-bottom: 20px;" id="avisoMao">
+<p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
+<p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a Mão da Etapa. Assim que as opções forem definidas, você poderá votar aqui!</p>
+<p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">🎰 A Mão da Etapa ativa a Roleta da Sorte para prêmios especiais!</p>
 </div>
 <p style="margin-bottom:20px;opacity:0.9">Vote na sua mão favorita da etapa:</p>
 <div id="maoOptions"></div>
-<button class="vote-btn" id="btnVotarMao" disabled>VOTAR NA MÃO</button>
+<button class="vote-btn" id="btnVotarMao" disabled style="background: #666; cursor: not-allowed;">AGUARDANDO OPÇÕES</button>
 <div class="results-section" id="maoResults" style="display:none">
 <h3 style="color:#d4a121;margin-bottom:15px">📊 Resultados</h3>
 <div id="maoResultsList"></div>
@@ -188,24 +184,9 @@ const firebaseConfig = {
 
 const jogadores = ["Amarildo","Boy","Buiu","Caio","Charles","Cleversson","Davi","Gera","Diego","Dos Anjos","Eduardo","Fernando","Gregory","Gaspar","Guilherme","Guti","Igor","Izidio","Jean","Jean Rebuy","Junior","Leo","Loreto","Lucas","Matheus","Maykon","Neto","Nil","Peterson","Rafael","Ricardo Amarante","Ricardo Linhares","Ricardo Matoso","Robson","Sergio","Solano","Tigre","Van Van","Waltinho","Wesley"];
 
-const opcoesJanta = [
-  "Vaca Atolada",
-  "Strogonoff",
-  "Frango Assado com Arroz",
-  "Quirera com Suã",
-  "Pão Com Pernil",
-  "Arroz Carreteiro",
-  "Carne de Panela",
-  "Dobradinha"
-];
-
-const opcoesMao = [
-  "7 e 2 OFF",
-  "K e 3 OFF",
-  "Q e 2 OFF",
-  "J e 4 OFF",
-  "10 e 2 OFF"
-];
+// OPÇÕES REMOVIDAS - AGORA AS OPÇÕES SERÃO CARREGADAS DO FIREBASE
+let opcoesJanta = [];
+let opcoesMao = [];
 
 let db;
 let votosJanta = {};
@@ -215,208 +196,109 @@ let maoSelecionada = null;
 let jogadorAtual = null;
 let modoAdmin = false;
 
-// FUNÇÃO PARA VERIFICAR PRAZO DE VOTAÇÃO
-function verificarPrazoVotacao() {
-  // Data limite: 26 de janeiro de 2026 às 22:00
-  const dataLimite = new Date('2026-01-26T22:00:00');
-  const agora = new Date();
-  
-  if (agora >= dataLimite) {
-    return {
-      expirado: true,
-      mensagem: '⏰ A votação da janta foi encerrada!',
-      motivo: 'Prazo finalizado em 26/01 às 22:00'
-    };
+// CARREGAR OPÇÕES DO FIREBASE
+async function carregarOpcoesDoFirebase() {
+  try {
+    const opcoesJantaSnapshot = await get(ref(db, 'opcoes/janta'));
+    const opcoesMaoSnapshot = await get(ref(db, 'opcoes/mao'));
+    
+    if (opcoesJantaSnapshot.exists()) {
+      opcoesJanta = opcoesJantaSnapshot.val();
+      console.log('Opções de janta carregadas:', opcoesJanta);
+    } else {
+      // Se não houver opções no Firebase, deixar vazio
+      opcoesJanta = [];
+    }
+    
+    if (opcoesMaoSnapshot.exists()) {
+      opcoesMao = opcoesMaoSnapshot.val();
+      console.log('Opções de mão carregadas:', opcoesMao);
+    } else {
+      // Se não houver opções no Firebase, deixar vazio
+      opcoesMao = [];
+    }
+    
+    // Renderizar opções após carregar
+    renderizarOpcoes('janta');
+    renderizarOpcoes('mao');
+    
+    // Atualizar avisos se houver opções
+    atualizarAvisosEnquetes();
+  } catch (e) {
+    console.error('Erro ao carregar opções:', e);
   }
-  
-  return { expirado: false };
 }
 
-// FUNÇÃO SIMPLES PARA CONTADOR REGRESSIVO
-function iniciarContadorRegressivo() {
-  const container = document.getElementById('contadorRegressivoContainer');
+// ATUALIZAR AVISOS DAS ENQUETES
+function atualizarAvisosEnquetes() {
+  const avisoJanta = document.getElementById('avisoJanta');
+  const avisoMao = document.getElementById('avisoMao');
+  const btnVotarJanta = document.getElementById('btnVotarJanta');
+  const btnVotarMao = document.getElementById('btnVotarMao');
   
-  // Para TESTE: usar amanhã às 22:00
-  const dataLimite = new Date();
-  dataLimite.setDate(dataLimite.getDate() + 0); // Amanhã
-  dataLimite.setHours(22, 0, 0, 0); // 22:00
-  
-  // Para produção: usar a data real
-  // const dataLimite = new Date('2026-01-26T22:00:00');
-  
-  function atualizarContador() {
-    const agora = new Date();
-    const diff = dataLimite - agora;
-    
-    if (diff <= 0) {
-      container.innerHTML = `
-        <div style="background: rgba(139, 0, 0, 0.3); border: 2px solid #ff0000; border-radius: 10px; padding: 12px; margin: 15px 0; text-align: center;">
-          <div style="font-weight: bold; color: #ff6b6b; font-size: 1.1em;">⏰ VOTAÇÃO ENCERRADA</div>
-          <div style="margin-top: 5px; font-size: 0.9em;">Prazo finalizado em 26/01 às 22:00</div>
-        </div>
-      `;
-      return;
-    }
-    
-    const horas = Math.floor(diff / (1000 * 60 * 60));
-    const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const segundos = Math.floor((diff % (1000 * 60)) / 1000);
-    
-    // Determinar cor com base no tempo
-    let corFundo, corBorda, corTexto;
-    
-    if (horas > 24) {
-      corFundo = 'rgba(212, 161, 33, 0.2)';
-      corBorda = '#d4a121';
-      corTexto = '#ffd700';
-    } else if (horas > 6) {
-      corFundo = 'rgba(255, 152, 0, 0.2)';
-      corBorda = '#ff9800';
-      corTexto = '#ffcc80';
-    } else {
-      corFundo = 'rgba(244, 67, 54, 0.2)';
-      corBorda = '#f44336';
-      corTexto = '#ffab91';
-    }
-    
-    container.style.display = 'block';
-    container.innerHTML = `
-      <div style="background: ${corFundo}; border: 2px solid ${corBorda}; border-radius: 10px; padding: 12px; margin: 15px 0; text-align: center; animation: pulse 2s infinite;">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-          <span style="font-size: 1.3em;">⏳</span>
-          <span style="flex-grow: 1; text-align: center;">
-            <strong style="color: ${corTexto}; font-family: 'Anton', sans-serif;">TEMPO RESTANTE:</strong><br>
-            <span style="font-size: 1.2em; letter-spacing: 1px; color: ${corTexto}; font-family: 'Anton', sans-serif;">${horas}h ${minutos}m ${segundos}s</span>
-          </span>
-          <span style="font-size: 1.3em;">⏳</span>
-        </div>
-        <div style="margin-top: 5px; font-size: 0.85em; opacity: 0.9;">
-          Votação encerra: <strong>26/01/2026 às 22:00</strong>
-        </div>
-      </div>
+  // Atualizar aviso da janta
+  if (opcoesJanta.length > 0) {
+    avisoJanta.innerHTML = `
+      <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">🍽️ VOTAÇÃO DA JANTA ABERTA</p>
+      <p style="opacity: 0.9; line-height: 1.6;">Escolha sua opção preferida para a janta! Quanto mais cedo você votar, melhor será a organização.</p>
+      <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">⏰ O prazo de votação será exibido aqui quando definido.</p>
     `;
-  }
-  
-  // Adicionar estilo de animação
-  if (!document.querySelector('#contadorStyle')) {
-    const style = document.createElement('style');
-    style.id = 'contadorStyle';
-    style.textContent = `
-      @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(212, 161, 33, 0.4); }
-        70% { box-shadow: 0 0 0 10px rgba(212, 161, 33, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(212, 161, 33, 0); }
-      }
+    btnVotarJanta.textContent = 'VOTAR NA JANTA';
+    btnVotarJanta.style.background = '#d4a121';
+    btnVotarJanta.style.cursor = 'pointer';
+  } else {
+    avisoJanta.innerHTML = `
+      <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
+      <p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a próxima votação da janta. Assim que as opções forem definidas, você poderá votar aqui!</p>
+      <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">⏰ O prazo de votação será exibido quando as opções estiverem disponíveis.</p>
     `;
-    document.head.appendChild(style);
-  }
-  
-  // Atualizar a cada segundo
-  atualizarContador();
-  setInterval(atualizarContador, 1000);
-}
-
-// FUNÇÃO PARA EXIBIR JANTA VENCEDORA
-function exibirJantaVencedora() {
-  const prazo = verificarPrazoVotacao();
-  const resultsContainer = document.getElementById('jantaResults');
-  const resultsList = document.getElementById('jantaResultsList');
-  
-  if (prazo.expirado) {
-    let votosPorJanta = {};
-    Object.values(votosJanta).forEach(voto => {
-      votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
-    });
-    
-    let jantaVencedora = '-';
-    let maxVotos = 0;
-    let empate = false;
-    
-    Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
-      if (votos > maxVotos) {
-        maxVotos = votos;
-        jantaVencedora = opcao;
-        empate = false;
-      } else if (votos === maxVotos && maxVotos > 0) {
-        empate = true;
-      }
-    });
-    
-    const mensagemVencedora = empate 
-      ? '🏆 EMPATE! Mais de uma opção recebeu o mesmo número de votos, Organização Decidirá.'
-      : `🏆 JANTA VENCEDORA: ${jantaVencedora} (${maxVotos} voto${maxVotos !== 1 ? 's' : ''})`;
-    
-    const divVencedora = document.createElement('div');
-    divVencedora.style.cssText = `
-      background: linear-gradient(135deg, #d4a121, #b8860b);
-      border: 3px solid #ffd700;
-      border-radius: 10px;
-      padding: 20px;
-      margin: 20px 0;
-      text-align: center;
-      color: #000;
-      font-weight: bold;
-      font-size: 1.2em;
-      box-shadow: 0 4px 15px rgba(212, 161, 33, 0.5);
-    `;
-    
-    divVencedora.innerHTML = `
-      <div style="font-size: 2em; margin-bottom: 10px;">🍽️</div>
-      <div>${mensagemVencedora}</div>
-      <div style="margin-top: 10px; font-size: 0.9em; opacity: 0.9;">
-        Votação encerrada em ${prazo.motivo}
-      </div>
-    `;
-    
-    if (resultsList.firstChild) {
-      resultsList.insertBefore(divVencedora, resultsList.firstChild);
-    } else {
-      resultsList.appendChild(divVencedora);
-    }
-    
-    btnVotarJanta.disabled = true;
-    btnVotarJanta.textContent = '⏰ VOTAÇÃO ENCERRADA';
+    btnVotarJanta.textContent = 'AGUARDANDO OPÇÕES';
     btnVotarJanta.style.background = '#666';
-    
-    document.getElementById('dashJantaVencedor').textContent = jantaVencedora;
-    document.getElementById('dashJantaVotos').textContent = `${maxVotos} voto${maxVotos !== 1 ? 's' : ''}`;
+    btnVotarJanta.style.cursor = 'not-allowed';
   }
-}
-
-// FUNÇÃO PARA ATUALIZAR STATUS DO PRAZO
-function atualizarStatusPrazo() {
-  const prazo = verificarPrazoVotacao();
-  const statusElement = document.getElementById('statusIndicator');
   
-  if (prazo.expirado) {
-    statusElement.innerHTML = '⏰ Votação da Janta ENCERRADA';
-    statusElement.style.background = '#8b0000';
-    statusElement.style.borderColor = '#ff0000';
-    
-    const avisoPrazo = document.getElementById('avisoJanta');
-    if (avisoPrazo) {
-      avisoPrazo.innerHTML = `
-        <p style="margin-bottom: 10px; font-weight: bold; color: #ff6b6b;">⏰ VOTAÇÃO DA JANTA ENCERRADA</p>
-        <p style="opacity: 0.9; line-height: 1.6;">
-          A votação foi encerrada, <strong>${prazo.motivo}</strong>.<br>
-          O Bruxo da Cozinha vai fazer o corre e preparar o quitute vencedor! 🧙‍♂️👨‍🍳
-        </p>
-      `;
-    }
+  // Atualizar aviso da mão
+  if (opcoesMao.length > 0) {
+    avisoMao.innerHTML = `
+      <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">🎰 MÃO DA ETAPA - VOTAÇÃO ABERTA!</p>
+      <p style="opacity: 0.9; line-height: 1.6;">Quem <strong>ganhar a mão</strong> com as cartas escolhidas e tiver <strong>showdown</strong> fica elegível a girar a <strong>Roleta da Sorte</strong> 🎡 e concorrer a prêmios especiais!</p>
+      <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">📋 Para mais informações, <a href="https://pokerdequinta.github.io/regulamento/" style="color: #d4a121; font-weight: bold; text-decoration: underline;">Leia o Regulamento</a></p>
+    `;
+    btnVotarMao.textContent = 'VOTAR NA MÃO';
+    btnVotarMao.style.background = '#d4a121';
+    btnVotarMao.style.cursor = 'pointer';
+  } else {
+    avisoMao.innerHTML = `
+      <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
+      <p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a Mão da Etapa. Assim que as opções forem definidas, você poderá votar aqui!</p>
+      <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">🎰 A Mão da Etapa ativa a Roleta da Sorte para prêmios especiais!</p>
+    `;
+    btnVotarMao.textContent = 'AGUARDANDO OPÇÕES';
+    btnVotarMao.style.background = '#666';
+    btnVotarMao.style.cursor = 'not-allowed';
   }
 }
 
 try {
   const app = initializeApp(firebaseConfig);
   db = getDatabase(app);
-  statusIndicator.textContent = '✅ Conectado';
-  statusIndicator.classList.add('connected');
+  
+  // Carregar opções do Firebase
+  carregarOpcoesDoFirebase();
+  
+  // Monitorar mudanças nas opções
+  onValue(ref(db, 'opcoes/janta'), () => {
+    carregarOpcoesDoFirebase();
+  });
+  
+  onValue(ref(db, 'opcoes/mao'), () => {
+    carregarOpcoesDoFirebase();
+  });
   
   onValue(ref(db, 'enquetes/janta'), (snapshot) => {
     votosJanta = snapshot.val() || {};
     renderizarOpcoes('janta');
     atualizarDashboard();
-    atualizarStatusPrazo();
   });
   
   onValue(ref(db, 'enquetes/mao'), (snapshot) => {
@@ -425,15 +307,8 @@ try {
     atualizarDashboard();
   });
 } catch (e) {
-  statusIndicator.textContent = '❌ Erro de conexão';
   console.error(e);
 }
-
-// INICIAR CONTADOR REGRESSIVO IMEDIATAMENTE
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOM carregado, iniciando contador...');
-  iniciarContadorRegressivo();
-});
 
 // Preencher select de jogadores
 const selectJogador = document.getElementById('playerSelect');
@@ -445,8 +320,9 @@ jogadores.sort().forEach(j => {
 
 selectJogador.onchange = (e) => {
   jogadorAtual = e.target.value;
-  btnVotarJanta.disabled = !jogadorAtual || !jantaSelecionada;
-  btnVotarMao.disabled = !jogadorAtual || !maoSelecionada;
+  // Só habilita os botões se houver opções definidas
+  btnVotarJanta.disabled = !jogadorAtual || !jantaSelecionada || opcoesJanta.length === 0;
+  btnVotarMao.disabled = !jogadorAtual || !maoSelecionada || opcoesMao.length === 0;
   renderizarOpcoes('janta');
   renderizarOpcoes('mao');
 };
@@ -458,42 +334,8 @@ function renderizarOpcoes(tipo) {
   const resultsContainer = document.getElementById(tipo + 'Results');
   const resultsList = document.getElementById(tipo + 'ResultsList');
   
-  resultsList.innerHTML = '';
-  
-  if (tipo === 'janta') {
-    const prazo = verificarPrazoVotacao();
-    if (prazo.expirado) {
-      opcoes.forEach(opcao => {
-        const div = document.createElement('div');
-        div.className = 'vote-option';
-        div.style.opacity = '0.6';
-        div.style.cursor = 'not-allowed';
-        
-        const numVotos = Object.values(votos).filter(v => v.opcao === opcao).length;
-        const totalVotos = Object.keys(votos).length;
-        const percentual = totalVotos > 0 ? (numVotos / totalVotos * 100).toFixed(1) : 0;
-        
-        div.innerHTML = `
-          <div class="option-header">
-            <span class="option-name">${opcao} 🔒</span>
-            <span class="option-votes">${numVotos} voto${numVotos !== 1 ? 's' : ''} (${percentual}%)</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width:${percentual}%"></div>
-          </div>
-          <div style="margin-top: 10px; color: #d4a121; font-size: 0.9em;">
-            ⏰ Votação encerrada
-          </div>
-        `;
-        
-        container.appendChild(div);
-      });
-      
-      exibirJantaVencedora();
-      resultsContainer.style.display = 'block';
-      return;
-    }
-  }
+  // Sempre esconder resultados por enquanto
+  resultsContainer.style.display = 'none';
   
   let totalVotos = 0;
   let votosPorOpcao = {};
@@ -516,6 +358,23 @@ function renderizarOpcoes(tipo) {
   });
   
   container.innerHTML = '';
+  
+  // Se não houver opções definidas
+  if (opcoes.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 30px; color: #d4a121; opacity: 0.7;">
+        <div style="font-size: 2.5em; margin-bottom: 15px;">⏳</div>
+        <div style="font-weight: bold; margin-bottom: 10px; font-size: 1.2em;">Opções ainda não definidas</div>
+        <div style="opacity: 0.9;">A organização está definindo as opções de votação. Em breve você poderá votar aqui!</div>
+        <div style="margin-top: 15px; font-size: 0.9em; opacity: 0.8;">
+          <strong>Como funciona:</strong> Quando as opções forem definidas, elas aparecerão aqui automaticamente.
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
+  // Se houver opções, renderizar normalmente
   opcoes.forEach(opcao => {
     const numVotos = votosPorOpcao[opcao] || 0;
     const percentual = totalVotos > 0 ? (numVotos / totalVotos * 100).toFixed(1) : 0;
@@ -561,25 +420,12 @@ function renderizarOpcoes(tipo) {
     
     container.appendChild(div);
   });
-  
-  if (totalVotos > 0) {
-    resultsContainer.style.display = 'block';
-    const ordenado = Object.entries(votosPorOpcao).sort((a, b) => b[1] - a[1]);
-    resultsList.innerHTML = ordenado.map(([opcao, votos]) => `
-      <div class="result-item">
-        <strong>${opcao}</strong>
-        <span>${votos} voto${votos !== 1 ? 's' : ''}</span>
-      </div>
-    `).join('');
-  }
 }
 
 btnVotarJanta.onclick = async () => {
   if (!jogadorAtual || !jantaSelecionada) return;
-  
-  const prazo = verificarPrazoVotacao();
-  if (prazo.expirado) {
-    alert(`❌ ${prazo.mensagem}\n${prazo.motivo}`);
+  if (opcoesJanta.length === 0) {
+    alert('As opções da janta ainda não foram definidas!');
     return;
   }
   
@@ -600,13 +446,17 @@ btnVotarJanta.onclick = async () => {
     data: new Date().toISOString()
   });
   
-  alert('Voto registrado com sucesso!Não Esqueça de Votar na Mão da Etapa🎉');
+  alert('Voto registrado com sucesso! Não Esqueça de Votar na Mão da Etapa 🎉');
   jantaSelecionada = null;
   btnVotarJanta.disabled = true;
 };
 
 btnVotarMao.onclick = async () => {
   if (!jogadorAtual || !maoSelecionada) return;
+  if (opcoesMao.length === 0) {
+    alert('As opções da mão ainda não foram definidas!');
+    return;
+  }
   
   const votosRef = ref(db, 'enquetes/mao');
   const snapshot = await get(votosRef);
@@ -631,48 +481,25 @@ btnVotarMao.onclick = async () => {
 };
 
 function atualizarDashboard() {
-  const prazo = verificarPrazoVotacao();
+  let votosPorJanta = {};
+  let votantesJanta = new Set();
+  Object.values(votosJanta).forEach(voto => {
+    votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
+    votantesJanta.add(voto.jogador);
+  });
   
-  if (prazo.expirado) {
-    let votosPorJanta = {};
-    Object.values(votosJanta).forEach(voto => {
-      votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
-    });
-    
-    let jantaVencedor = '-';
-    let jantaMaxVotos = 0;
-    Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
-      if (votos > jantaMaxVotos) {
-        jantaMaxVotos = votos;
-        jantaVencedor = opcao;
-      }
-    });
-    
-    document.getElementById('dashJantaVencedor').textContent = jantaVencedor;
-    document.getElementById('dashJantaVotos').textContent = `${jantaMaxVotos} voto${jantaMaxVotos !== 1 ? 's' : ''}`;
-    document.getElementById('dashJantaVencedor').style.color = '#ffd700';
-    document.getElementById('dashJantaVotos').style.color = '#ffd700';
-  } else {
-    let votosPorJanta = {};
-    let votantesJanta = new Set();
-    Object.values(votosJanta).forEach(voto => {
-      votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
-      votantesJanta.add(voto.jogador);
-    });
-    
-    let jantaVencedor = '-';
-    let jantaMaxVotos = 0;
-    Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
-      if (votos > jantaMaxVotos) {
-        jantaMaxVotos = votos;
-        jantaVencedor = opcao;
-      }
-    });
-    document.getElementById('dashJantaVencedor').textContent = jantaVencedor;
-    document.getElementById('dashJantaVotos').textContent = `${jantaMaxVotos} voto${jantaMaxVotos !== 1 ? 's' : ''}`;
-    document.getElementById('dashJantaVencedor').style.color = '#fff';
-    document.getElementById('dashJantaVotos').style.color = '#d4a121';
-  }
+  let jantaVencedor = '-';
+  let jantaMaxVotos = 0;
+  Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
+    if (votos > jantaMaxVotos) {
+      jantaMaxVotos = votos;
+      jantaVencedor = opcao;
+    }
+  });
+  document.getElementById('dashJantaVencedor').textContent = jantaVencedor;
+  document.getElementById('dashJantaVotos').textContent = `${jantaMaxVotos} voto${jantaMaxVotos !== 1 ? 's' : ''}`;
+  document.getElementById('dashJantaVencedor').style.color = '#fff';
+  document.getElementById('dashJantaVotos').style.color = '#d4a121';
   
   let votosPorMao = {};
   let votantesMao = new Set();
@@ -728,23 +555,13 @@ btnAcessarAdmin.onclick = () => {
   }
 };
 
-// Garantir que o contador seja iniciado
-window.addEventListener('load', function() {
-  console.log('Página carregada, iniciando contador...');
-  iniciarContadorRegressivo();
-  
-
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Sistema de enquetes carregado');
+  console.log('As opções serão carregadas automaticamente do Firebase quando definidas');
 });
 
 </script>
 </body>
 
 </html>
-
-
-
-
-
-
-
-
