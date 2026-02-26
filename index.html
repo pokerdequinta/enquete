@@ -16,8 +16,12 @@ header{text-align:center;background:#102810;border:2px solid #d4a121;border-radi
 h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 .subtitle{margin-top:10px}
 
-.enquete-section{background:#102810;border:2px solid #d4a121;border-radius:12px;padding:25px;margin-bottom:25px}
+.enquete-section{background:#102810;border:2px solid #d4a121;border-radius:12px;padding:25px;margin-bottom:25px;position:relative}
 .enquete-section h2{font-family:'Anton';color:#d4a121;margin-bottom:20px;font-size:1.8em}
+.enquete-section.encerrada{opacity:0.8;border-color:#8b0000;background:#1a0f0f}
+.enquete-section.encerrada h2{color:#ff6b6b}
+
+.encerrada-badge{position:absolute;top:10px;right:10px;background:#8b0000;color:#fff;padding:5px 15px;border-radius:20px;font-weight:bold;font-size:0.9em;border:1px solid #d4a121}
 
 .vote-option{background:rgba(255,255,255,.05);padding:15px;border-radius:10px;margin-bottom:10px;cursor:pointer;border:2px solid transparent;transition:all 0.3s}
 .vote-option:hover{border-color:#d4a121;background:rgba(212,161,33,.1)}
@@ -70,6 +74,10 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 .admin-section h3{color:#8b0000;font-family:'Anton';margin-bottom:15px;font-size:1.4em}
 .option-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:8px}
 .option-list-item span{flex-grow:1}
+
+.status-enquete{display:inline-block;padding:3px 10px;border-radius:15px;font-size:0.8em;margin-left:10px;vertical-align:middle}
+.status-enquete.aberta{background:#1a3d1a;border:1px solid #4CAF50;color:#4CAF50}
+.status-enquete.encerrada{background:#8b0000;border:1px solid #ff6b6b;color:#ff6b6b}
 
 @media(max-width:768px){
 .option-header{flex-direction:column;align-items:flex-start;gap:5px}
@@ -126,7 +134,7 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 
 <!-- ENQUETE 1: JANTA -->
 <div class="enquete-section" id="enqueteJanta">
-<h2>🍽️ ENQUETE: JANTA</h2>
+<h2>🍽️ ENQUETE: JANTA <span id="statusJanta" class="status-enquete"></span></h2>
 <div style="background: rgba(212, 161, 33, 0.1); border: 2px dashed #d4a121; border-radius: 10px; padding: 15px; margin-bottom: 20px;" id="avisoJanta">
 <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
 <p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a próxima votação da janta. Assim que as opções forem definidas, você poderá votar aqui!</p>
@@ -143,8 +151,8 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 </div>
 
 <!-- ENQUETE 2: MÃO DA ETAPA -->
-<div class="enquete-section">
-<h2>🎴 ENQUETE: MÃO DA ETAPA</h2>
+<div class="enquete-section" id="enqueteMao">
+<h2>🎴 ENQUETE: MÃO DA ETAPA <span id="statusMao" class="status-enquete"></span></h2>
 <div style="background: rgba(212, 161, 33, 0.1); border: 2px dashed #d4a121;border-radius: 10px; padding: 15px; margin-bottom: 20px;" id="avisoMao">
 <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
 <p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a Mão da Etapa. Assim que as opções forem definidas, você poderá votar aqui!</p>
@@ -197,6 +205,22 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 </div>
 </div>
 </div>
+</div>
+
+<!-- NOVA SEÇÃO: CONTROLE DE ENCERRAMENTO DAS ENQUETES -->
+<div style="background:rgba(139,0,0,0.2);border:1px dashed #8b0000;border-radius:8px;padding:15px;margin:20px 0">
+<h4 style="color:#ff6b6b;margin-bottom:15px">⏹️ CONTROLE DE ENCERRAMENTO DAS ENQUETES</h4>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px">
+<div>
+<p style="margin-bottom:10px;font-weight:bold">🍽️ Enquete Janta</p>
+<button class="modal-btn" id="btnEncerrarJanta" style="background:#8b0000;color:#fff;width:100%">ENCERRAR VOTAÇÃO DA JANTA</button>
+</div>
+<div>
+<p style="margin-bottom:10px;font-weight:bold">🎴 Enquete Mão</p>
+<button class="modal-btn" id="btnEncerrarMao" style="background:#8b0000;color:#fff;width:100%">ENCERRAR VOTAÇÃO DA MÃO</button>
+</div>
+</div>
+<p style="font-size:0.9em;opacity:0.8;text-align:center">⚠️ Após encerrar, os jogadores não poderão mais votar nesta enquete</p>
 </div>
 
 <div style="background:rgba(139,0,0,0.2);border:1px dashed #8b0000;border-radius:8px;padding:15px;margin-top:20px">
@@ -257,8 +281,42 @@ let maoSelecionada = null;
 let jogadorAtual = null;
 let modoAdmin = false;
 
+// NOVAS VARIÁVEIS PARA CONTROLE DE ENCERRAMENTO
+let jantaEncerrada = false;
+let maoEncerrada = false;
+
 // NÚMERO FIXO PARA CÁLCULO DE PARTICIPAÇÃO
 const TOTAL_PARTICIPANTES = 20;
+
+// FUNÇÃO PARA ENCERRAR ENQUETE DA JANTA
+async function encerrarEnqueteJanta() {
+  if (!confirm('⚠️ ATENÇÃO: Isso irá ENCERRAR a votação da janta. Os jogadores não poderão mais votar. Deseja continuar?')) {
+    return;
+  }
+  
+  try {
+    await set(ref(db, 'controle/jantaEncerrada'), true);
+    alert('✅ Enquete da janta encerrada com sucesso!');
+  } catch (e) {
+    console.error('Erro ao encerrar enquete da janta:', e);
+    alert('❌ Erro ao encerrar enquete: ' + e.message);
+  }
+}
+
+// FUNÇÃO PARA ENCERRAR ENQUETE DA MÃO
+async function encerrarEnqueteMao() {
+  if (!confirm('⚠️ ATENÇÃO: Isso irá ENCERRAR a votação da mão. Os jogadores não poderão mais votar. Deseja continuar?')) {
+    return;
+  }
+  
+  try {
+    await set(ref(db, 'controle/maoEncerrada'), true);
+    alert('✅ Enquete da mão encerrada com sucesso!');
+  } catch (e) {
+    console.error('Erro ao encerrar enquete da mão:', e);
+    alert('❌ Erro ao encerrar enquete: ' + e.message);
+  }
+}
 
 // FUNÇÃO PARA LIMPAR TODOS OS VOTOS DAS ENQUETES
 async function limparTodosVotos() {
@@ -493,47 +551,99 @@ function atualizarAvisosEnquetes() {
   const avisoMao = document.getElementById('avisoMao');
   const btnVotarJanta = document.getElementById('btnVotarJanta');
   const btnVotarMao = document.getElementById('btnVotarMao');
+  const enqueteJanta = document.getElementById('enqueteJanta');
+  const enqueteMao = document.getElementById('enqueteMao');
+  const statusJanta = document.getElementById('statusJanta');
+  const statusMao = document.getElementById('statusMao');
   
-  // Atualizar aviso da janta
-  if (opcoesJanta.length > 0) {
+  // Verificar status de encerramento
+  if (jantaEncerrada) {
+    enqueteJanta.classList.add('encerrada');
+    statusJanta.textContent = ' ENCERRADA';
+    statusJanta.className = 'status-enquete encerrada';
+    
     avisoJanta.innerHTML = `
-      <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">🍽️ VOTAÇÃO DA JANTA ABERTA</p>
-      <p style="opacity: 0.9; line-height: 1.6;">Escolha sua opção preferida para a janta! Quanto mais cedo você votar, melhor será a organização.</p>
-      <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">⏰ O prazo de votação será exibido aqui quando definido.</p>
+      <p style="margin-bottom: 10px; font-weight: bold; color: #ff6b6b;">⏹️ VOTAÇÃO ENCERRADA</p>
+      <p style="opacity: 0.9; line-height: 1.6;">A votação da janta foi encerrada pela organização. Não é mais possível votar.</p>
+      <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">📊 Resultados finais disponíveis abaixo.</p>
     `;
-    btnVotarJanta.textContent = 'VOTAR NA JANTA';
-    btnVotarJanta.style.background = '#d4a121';
-    btnVotarJanta.style.cursor = 'pointer';
+    btnVotarJanta.disabled = true;
+    btnVotarJanta.textContent = 'VOTAÇÃO ENCERRADA';
+    btnVotarJanta.style.background = '#8b0000';
   } else {
-    avisoJanta.innerHTML = `
-      <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
-      <p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a próxima votação da janta. Assim que as opções forem definidas, você poderá votar aqui!</p>
-      <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">⏰ O prazo de votação será exibido quando as opções estiverem disponíveis.</p>
-    `;
-    btnVotarJanta.textContent = 'AGUARDANDO OPÇÕES';
-    btnVotarJanta.style.background = '#666';
-    btnVotarJanta.style.cursor = 'not-allowed';
+    enqueteJanta.classList.remove('encerrada');
+    
+    // Atualizar aviso da janta baseado nas opções
+    if (opcoesJanta.length > 0) {
+      statusJanta.textContent = ' ABERTA';
+      statusJanta.className = 'status-enquete aberta';
+      
+      avisoJanta.innerHTML = `
+        <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">🍽️ VOTAÇÃO DA JANTA ABERTA</p>
+        <p style="opacity: 0.9; line-height: 1.6;">Escolha sua opção preferida para a janta! Quanto mais cedo você votar, melhor será a organização.</p>
+        <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">⏰ O prazo de votação será exibido aqui quando definido.</p>
+      `;
+      btnVotarJanta.textContent = 'VOTAR NA JANTA';
+      btnVotarJanta.style.background = '#d4a121';
+      btnVotarJanta.style.cursor = 'pointer';
+    } else {
+      statusJanta.textContent = ' AGUARDANDO';
+      statusJanta.className = 'status-enquete';
+      
+      avisoJanta.innerHTML = `
+        <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
+        <p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a próxima votação da janta. Assim que as opções forem definidas, você poderá votar aqui!</p>
+        <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">⏰ O prazo de votação será exibido quando as opções estiverem disponíveis.</p>
+      `;
+      btnVotarJanta.textContent = 'AGUARDANDO OPÇÕES';
+      btnVotarJanta.style.background = '#666';
+      btnVotarJanta.style.cursor = 'not-allowed';
+    }
   }
   
-  // Atualizar aviso da mão
-  if (opcoesMao.length > 0) {
+  // Verificar status de encerramento da mão
+  if (maoEncerrada) {
+    enqueteMao.classList.add('encerrada');
+    statusMao.textContent = ' ENCERRADA';
+    statusMao.className = 'status-enquete encerrada';
+    
     avisoMao.innerHTML = `
-      <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">🎰 MÃO DA ETAPA - VOTAÇÃO ABERTA!</p>
-      <p style="opacity: 0.9; line-height: 1.6;">Quem <strong>ganhar a mão</strong> com as cartas escolhidas e tiver <strong>showdown</strong> fica elegível a girar a <strong>Roleta da Sorte</strong> 🎡 e concorrer a prêmios especiais!</p>
-      <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">📋 Para mais informações, <a href="https://pokerdequinta.github.io/regulamento/" style="color: #d4a121; font-weight: bold; text-decoration: underline;">Leia o Regulamento</a></p>
+      <p style="margin-bottom: 10px; font-weight: bold; color: #ff6b6b;">⏹️ VOTAÇÃO ENCERRADA</p>
+      <p style="opacity: 0.9; line-height: 1.6;">A votação da mão foi encerrada pela organização. Não é mais possível votar.</p>
+      <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">📊 Resultados finais disponíveis abaixo.</p>
     `;
-    btnVotarMao.textContent = 'VOTAR NA MÃO';
-    btnVotarMao.style.background = '#d4a121';
-    btnVotarMao.style.cursor = 'pointer';
+    btnVotarMao.disabled = true;
+    btnVotarMao.textContent = 'VOTAÇÃO ENCERRADA';
+    btnVotarMao.style.background = '#8b0000';
   } else {
-    avisoMao.innerHTML = `
-      <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
-      <p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a Mão da Etapa. Assim que as opções forem definidas, você poderá votar aqui!</p>
-      <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">🎰 A Mão da Etapa ativa a Roleta da Sorte para prêmios especiais!</p>
-    `;
-    btnVotarMao.textContent = 'AGUARDANDO OPÇÕES';
-    btnVotarMao.style.background = '#666';
-    btnVotarMao.style.cursor = 'not-allowed';
+    enqueteMao.classList.remove('encerrada');
+    
+    // Atualizar aviso da mão baseado nas opções
+    if (opcoesMao.length > 0) {
+      statusMao.textContent = ' ABERTA';
+      statusMao.className = 'status-enquete aberta';
+      
+      avisoMao.innerHTML = `
+        <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">🎰 MÃO DA ETAPA - VOTAÇÃO ABERTA!</p>
+        <p style="opacity: 0.9; line-height: 1.6;">Quem <strong>ganhar a mão</strong> com as cartas escolhidas e tiver <strong>showdown</strong> fica elegível a girar a <strong>Roleta da Sorte</strong> 🎡 e concorrer a prêmios especiais!</p>
+        <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">📋 Para mais informações, <a href="https://pokerdequinta.github.io/regulamento/" style="color: #d4a121; font-weight: bold; text-decoration: underline;">Leia o Regulamento</a></p>
+      `;
+      btnVotarMao.textContent = 'VOTAR NA MÃO';
+      btnVotarMao.style.background = '#d4a121';
+      btnVotarMao.style.cursor = 'pointer';
+    } else {
+      statusMao.textContent = ' AGUARDANDO';
+      statusMao.className = 'status-enquete';
+      
+      avisoMao.innerHTML = `
+        <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
+        <p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a Mão da Etapa. Assim que as opções forem definidas, você poderá votar aqui!</p>
+        <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">🎰 A Mão da Etapa ativa a Roleta da Sorte para prêmios especiais!</p>
+      `;
+      btnVotarMao.textContent = 'AGUARDANDO OPÇÕES';
+      btnVotarMao.style.background = '#666';
+      btnVotarMao.style.cursor = 'not-allowed';
+    }
   }
 }
 
@@ -542,6 +652,19 @@ try {
   db = getDatabase(app);
   
   console.log('Conectado ao Firebase');
+  
+  // Monitorar status de encerramento
+  onValue(ref(db, 'controle/jantaEncerrada'), (snapshot) => {
+    jantaEncerrada = snapshot.val() || false;
+    atualizarAvisosEnquetes();
+    renderizarOpcoes('janta');
+  });
+  
+  onValue(ref(db, 'controle/maoEncerrada'), (snapshot) => {
+    maoEncerrada = snapshot.val() || false;
+    atualizarAvisosEnquetes();
+    renderizarOpcoes('mao');
+  });
   
   // Carregar opções do Firebase
   carregarOpcoesDoFirebase();
@@ -580,9 +703,9 @@ jogadores.sort().forEach(j => {
 
 selectJogador.onchange = (e) => {
   jogadorAtual = e.target.value;
-  // Só habilita os botões se houver opções definidas
-  btnVotarJanta.disabled = !jogadorAtual || !jantaSelecionada || opcoesJanta.length === 0;
-  btnVotarMao.disabled = !jogadorAtual || !maoSelecionada || opcoesMao.length === 0;
+  // Só habilita os botões se não estiver encerrado, houver opções e seleção
+  btnVotarJanta.disabled = !jogadorAtual || !jantaSelecionada || opcoesJanta.length === 0 || jantaEncerrada;
+  btnVotarMao.disabled = !jogadorAtual || !maoSelecionada || opcoesMao.length === 0 || maoEncerrada;
   renderizarOpcoes('janta');
   renderizarOpcoes('mao');
 };
@@ -592,6 +715,7 @@ function renderizarOpcoes(tipo) {
   const votos = tipo === 'janta' ? votosJanta : votosMao;
   const container = document.getElementById(tipo + 'Options');
   const resultsContainer = document.getElementById(tipo + 'Results');
+  const isEncerrada = tipo === 'janta' ? jantaEncerrada : maoEncerrada;
   
   // Sempre esconder resultados por enquanto
   resultsContainer.style.display = 'none';
@@ -633,6 +757,21 @@ function renderizarOpcoes(tipo) {
     return;
   }
   
+  // Se estiver encerrada, mostrar mensagem
+  if (isEncerrada) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 30px; color: #ff6b6b;">
+        <div style="font-size: 2.5em; margin-bottom: 15px;">⏹️</div>
+        <div style="font-weight: bold; margin-bottom: 10px; font-size: 1.2em;">VOTAÇÃO ENCERRADA</div>
+        <div style="opacity: 0.9;">A votação foi encerrada pela organização. Não é mais possível votar.</div>
+        <div style="margin-top: 15px; font-size: 0.9em; opacity: 0.8;">
+          <strong>Resultados finais:</strong> Total de ${totalVotos} voto${totalVotos !== 1 ? 's' : ''}
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
   // Se houver opções, renderizar normalmente
   opcoes.forEach(opcao => {
     const numVotos = votosPorOpcao[opcao] || 0;
@@ -645,6 +784,10 @@ function renderizarOpcoes(tipo) {
     div.onclick = () => {
       if (!jogadorAtual) {
         alert('Selecione seu nome primeiro!');
+        return;
+      }
+      if (isEncerrada) {
+        alert('Esta votação foi encerrada!');
         return;
       }
       if (tipo === 'janta') {
@@ -687,6 +830,10 @@ btnVotarJanta.onclick = async () => {
     alert('As opções da janta ainda não foram definidas!');
     return;
   }
+  if (jantaEncerrada) {
+    alert('A votação da janta foi encerrada!');
+    return;
+  }
   
   const votosRef = ref(db, 'enquetes/janta');
   const snapshot = await get(votosRef);
@@ -714,6 +861,10 @@ btnVotarMao.onclick = async () => {
   if (!jogadorAtual || !maoSelecionada) return;
   if (opcoesMao.length === 0) {
     alert('As opções da mão ainda não foram definidas!');
+    return;
+  }
+  if (maoEncerrada) {
+    alert('A votação da mão foi encerrada!');
     return;
   }
   
@@ -853,6 +1004,10 @@ document.getElementById('btnLimparOpcoes').onclick = () => {
   limparTodasOpcoes();
 };
 
+// NOVOS BOTÕES DE ENCERRAMENTO
+document.getElementById('btnEncerrarJanta').onclick = encerrarEnqueteJanta;
+document.getElementById('btnEncerrarMao').onclick = encerrarEnqueteMao;
+
 // Permitir Enter para adicionar opções
 document.getElementById('novaOpcaoJanta').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
@@ -876,4 +1031,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 
 </html>
-
