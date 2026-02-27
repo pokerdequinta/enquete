@@ -20,6 +20,7 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 .enquete-section h2{font-family:'Anton';color:#d4a121;margin-bottom:20px;font-size:1.8em}
 .enquete-section.encerrada{opacity:0.8;border-color:#8b0000;background:#1a0f0f}
 .enquete-section.encerrada h2{color:#ff6b6b}
+.enquete-section.fechada{opacity:0.9;border-color:#d4a121;background:#102810}
 
 .encerrada-badge{position:absolute;top:10px;right:10px;background:#8b0000;color:#fff;padding:5px 15px;border-radius:20px;font-weight:bold;font-size:0.9em;border:1px solid #d4a121}
 
@@ -78,6 +79,7 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 .status-enquete{display:inline-block;padding:3px 10px;border-radius:15px;font-size:0.8em;margin-left:10px;vertical-align:middle}
 .status-enquete.aberta{background:#1a3d1a;border:1px solid #4CAF50;color:#4CAF50}
 .status-enquete.encerrada{background:#8b0000;border:1px solid #ff6b6b;color:#ff6b6b}
+.status-enquete.fechada{background:#555;border:1px solid #d4a121;color:#d4a121}
 
 @media(max-width:768px){
 .option-header{flex-direction:column;align-items:flex-start;gap:5px}
@@ -136,12 +138,10 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 <div class="enquete-section" id="enqueteJanta">
 <h2>🍽️ ENQUETE: JANTA <span id="statusJanta" class="status-enquete"></span></h2>
 <div style="background: rgba(212, 161, 33, 0.1); border: 2px dashed #d4a121; border-radius: 10px; padding: 15px; margin-bottom: 20px;" id="avisoJanta">
-<p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
-<p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a próxima votação da janta. Assim que as opções forem definidas, você poderá votar aqui!</p>
-<p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">⏰ O prazo de votação será exibido quando as opções estiverem disponíveis.</p>
+<!-- Mensagem dinâmica via JS -->
 </div>
 
-<p style="margin-bottom:20px;opacity:0.9">Escolha sua opção preferida para a janta:</p>
+<!-- Área de opções (dinâmica) -->
 <div id="jantaOptions"></div>
 <button class="vote-btn" id="btnVotarJanta" disabled style="background: #666; cursor: not-allowed;">AGUARDANDO OPÇÕES</button>
 <div class="results-section" id="jantaResults" style="display:none">
@@ -154,11 +154,8 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 <div class="enquete-section" id="enqueteMao">
 <h2>🎴 ENQUETE: MÃO DA ETAPA <span id="statusMao" class="status-enquete"></span></h2>
 <div style="background: rgba(212, 161, 33, 0.1); border: 2px dashed #d4a121;border-radius: 10px; padding: 15px; margin-bottom: 20px;" id="avisoMao">
-<p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
-<p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a Mão da Etapa. Assim que as opções forem definidas, você poderá votar aqui!</p>
-<p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">🎰 A Mão da Etapa ativa a Roleta da Sorte para prêmios especiais!</p>
+<!-- Mensagem dinâmica via JS -->
 </div>
-<p style="margin-bottom:20px;opacity:0.9">Vote na sua mão favorita da etapa:</p>
 <div id="maoOptions"></div>
 <button class="vote-btn" id="btnVotarMao" disabled style="background: #666; cursor: not-allowed;">AGUARDANDO OPÇÕES</button>
 <div class="results-section" id="maoResults" style="display:none">
@@ -207,20 +204,22 @@ h1{font-family:'Anton';color:#d4a121;letter-spacing:3px}
 </div>
 </div>
 
-<!-- NOVA SEÇÃO: CONTROLE DE ENCERRAMENTO DAS ENQUETES -->
+<!-- CONTROLE DE ABERTURA/ENCERRAMENTO DAS ENQUETES -->
 <div style="background:rgba(139,0,0,0.2);border:1px dashed #8b0000;border-radius:8px;padding:15px;margin:20px 0">
-<h4 style="color:#ff6b6b;margin-bottom:15px">⏹️ CONTROLE DE ENCERRAMENTO DAS ENQUETES</h4>
+<h4 style="color:#ff6b6b;margin-bottom:15px">⏯️ CONTROLE DE ABERTURA/ENCERRAMENTO</h4>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px">
 <div>
 <p style="margin-bottom:10px;font-weight:bold">🍽️ Enquete Janta</p>
+<button class="modal-btn" id="btnAbrirJanta" style="background:#4CAF50;color:#fff;width:100%;margin-bottom:5px">ABRIR VOTAÇÃO DA JANTA</button>
 <button class="modal-btn" id="btnEncerrarJanta" style="background:#8b0000;color:#fff;width:100%">ENCERRAR VOTAÇÃO DA JANTA</button>
 </div>
 <div>
 <p style="margin-bottom:10px;font-weight:bold">🎴 Enquete Mão</p>
+<button class="modal-btn" id="btnAbrirMao" style="background:#4CAF50;color:#fff;width:100%;margin-bottom:5px">ABRIR VOTAÇÃO DA MÃO</button>
 <button class="modal-btn" id="btnEncerrarMao" style="background:#8b0000;color:#fff;width:100%">ENCERRAR VOTAÇÃO DA MÃO</button>
 </div>
 </div>
-<p style="font-size:0.9em;opacity:0.8;text-align:center">⚠️ Após encerrar, os jogadores não poderão mais votar nesta enquete</p>
+<p style="font-size:0.9em;opacity:0.8;text-align:center">⚠️ Use "Abrir" para liberar a votação. As opções precisam existir.</p>
 </div>
 
 <div style="background:rgba(139,0,0,0.2);border:1px dashed #8b0000;border-radius:8px;padding:15px;margin-top:20px">
@@ -269,7 +268,6 @@ const firebaseConfig = {
 
 const jogadores = ["Amarildo","Boy","Buiu","Caio","Charles","Cleversson","Davi","Gera","Diego","Dos Anjos","Eduardo","Fernando","Gregory","Gaspar","Guilherme","Guti","Kastelo","Izidio","Jean","Jean Rebuy","Junior","Leo","Loreto","Lucas","Matheus","Maykon","Neto","Nil","Peterson","Rafael","Ricardo Amarante","Ricardo Linhares","Ricardo Matoso","Robson","Sergio","Solano","Tigre","Van Van","Waltinho","Wesley"];
 
-// OPÇÕES REMOVIDAS - AGORA AS OPÇÕES SERÃO CARREGADAS DO FIREBASE
 let opcoesJanta = [];
 let opcoesMao = [];
 
@@ -281,271 +279,172 @@ let maoSelecionada = null;
 let jogadorAtual = null;
 let modoAdmin = false;
 
-// NOVAS VARIÁVEIS PARA CONTROLE DE ENCERRAMENTO
+// CONTROLE DE ABERTURA E ENCERRAMENTO
+let jantaAberta = false;      // false = aguardando definição/liberada? na prática, controlamos por 'jantaEncerrada' e 'jantaAtiva'?
+let maoAberta = false;
 let jantaEncerrada = false;
 let maoEncerrada = false;
 
-// NÚMERO FIXO PARA CÁLCULO DE PARTICIPAÇÃO
 const TOTAL_PARTICIPANTES = 20;
 
-// FUNÇÃO PARA ENCERRAR ENQUETE DA JANTA
-async function encerrarEnqueteJanta() {
-  if (!confirm('⚠️ ATENÇÃO: Isso irá ENCERRAR a votação da janta. Os jogadores não poderão mais votar. Deseja continuar?')) {
+// ========== NOVAS FUNÇÕES PARA ABRIR VOTAÇÃO ==========
+async function abrirEnqueteJanta() {
+  if (!modoAdmin) return;
+  if (opcoesJanta.length === 0) {
+    alert('Adicione pelo menos uma opção para a janta antes de abrir a votação.');
     return;
   }
-  
+  try {
+    await set(ref(db, 'controle/jantaEncerrada'), false);   // Garante que não está encerrada
+    await set(ref(db, 'controle/jantaAberta'), true);       // Marca como aberta (ativa)
+    alert('✅ Votação da janta ABERTA com sucesso!');
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  }
+}
+
+async function abrirEnqueteMao() {
+  if (!modoAdmin) return;
+  if (opcoesMao.length === 0) {
+    alert('Adicione pelo menos uma opção para a mão antes de abrir a votação.');
+    return;
+  }
+  try {
+    await set(ref(db, 'controle/maoEncerrada'), false);
+    await set(ref(db, 'controle/maoAberta'), true);
+    alert('✅ Votação da mão ABERTA com sucesso!');
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  }
+}
+
+async function encerrarEnqueteJanta() {
+  if (!confirm('⚠️ ATENÇÃO: Isso irá ENCERRAR a votação da janta. Os jogadores não poderão mais votar. Deseja continuar?')) return;
   try {
     await set(ref(db, 'controle/jantaEncerrada'), true);
+    await set(ref(db, 'controle/jantaAberta'), false); // opcional, mas consistente
     alert('✅ Enquete da janta encerrada com sucesso!');
   } catch (e) {
-    console.error('Erro ao encerrar enquete da janta:', e);
-    alert('❌ Erro ao encerrar enquete: ' + e.message);
+    alert('❌ Erro: ' + e.message);
   }
 }
 
-// FUNÇÃO PARA ENCERRAR ENQUETE DA MÃO
 async function encerrarEnqueteMao() {
-  if (!confirm('⚠️ ATENÇÃO: Isso irá ENCERRAR a votação da mão. Os jogadores não poderão mais votar. Deseja continuar?')) {
-    return;
-  }
-  
+  if (!confirm('⚠️ ATENÇÃO: Isso irá ENCERRAR a votação da mão. Os jogadores não poderão mais votar. Deseja continuar?')) return;
   try {
     await set(ref(db, 'controle/maoEncerrada'), true);
+    await set(ref(db, 'controle/maoAberta'), false);
     alert('✅ Enquete da mão encerrada com sucesso!');
   } catch (e) {
-    console.error('Erro ao encerrar enquete da mão:', e);
-    alert('❌ Erro ao encerrar enquete: ' + e.message);
+    alert('❌ Erro: ' + e.message);
   }
 }
 
-// FUNÇÃO PARA LIMPAR TODOS OS VOTOS DAS ENQUETES
+// LIMPEZAS...
 async function limparTodosVotos() {
   try {
-    console.log('Iniciando limpeza de TODOS os votos...');
-    
-    // Limpar votos da janta
     const votosJantaRef = ref(db, 'enquetes/janta');
     const snapshotJanta = await get(votosJantaRef);
-    
     if (snapshotJanta.exists()) {
-      const votos = snapshotJanta.val();
-      let votosRemovidos = 0;
-      
-      for (let key in votos) {
+      for (let key in snapshotJanta.val()) {
         await remove(ref(db, `enquetes/janta/${key}`));
-        votosRemovidos++;
       }
-      
-      console.log(`${votosRemovidos} votos da janta removidos`);
     }
-    
-    // Limpar votos da mão
     const votosMaoRef = ref(db, 'enquetes/mao');
     const snapshotMao = await get(votosMaoRef);
-    
     if (snapshotMao.exists()) {
-      const votos = snapshotMao.val();
-      let votosRemovidos = 0;
-      
-      for (let key in votos) {
+      for (let key in snapshotMao.val()) {
         await remove(ref(db, `enquetes/mao/${key}`));
-        votosRemovidos++;
       }
-      
-      console.log(`${votosRemovidos} votos da mão removidos`);
     }
-    
-    console.log('Todos os votos foram removidos com sucesso!');
-    
-    // Forçar reset dos dados locais
-    votosJanta = {};
-    votosMao = {};
-    
-    // Atualizar interface
-    renderizarOpcoes('janta');
-    renderizarOpcoes('mao');
+    votosJanta = {}; votosMao = {};
+    renderizarOpcoes('janta'); renderizarOpcoes('mao');
     atualizarDashboard();
-    
-    alert('✅ Todos os votos foram removidos com sucesso!');
-    
+    alert('✅ Todos os votos removidos!');
   } catch (e) {
-    console.error('Erro ao limpar votos:', e);
-    alert('❌ Erro ao limpar votos: ' + e.message);
+    alert('Erro: ' + e.message);
   }
 }
 
-// FUNÇÃO PARA LIMPAR TODAS AS OPÇÕES
 async function limparTodasOpcoes() {
-  if (!confirm('⚠️ ATENÇÃO: Isso irá remover TODAS as opções de votação. Deseja continuar?')) {
-    return;
-  }
-  
+  if (!confirm('Remover TODAS as opções?')) return;
   try {
-    // Limpar opções da janta
     await set(ref(db, 'opcoes/janta'), []);
-    
-    // Limpar opções da mão
     await set(ref(db, 'opcoes/mao'), []);
-    
-    console.log('Todas as opções foram removidas');
-    alert('✅ Todas as opções foram removidas com sucesso!');
-    
+    alert('✅ Opções removidas!');
   } catch (e) {
-    console.error('Erro ao limpar opções:', e);
-    alert('❌ Erro ao limpar opções: ' + e.message);
+    alert('Erro: ' + e.message);
   }
 }
 
-// CARREGAR OPÇÕES DO FIREBASE
 async function carregarOpcoesDoFirebase() {
   try {
     const opcoesJantaSnapshot = await get(ref(db, 'opcoes/janta'));
     const opcoesMaoSnapshot = await get(ref(db, 'opcoes/mao'));
+    opcoesJanta = opcoesJantaSnapshot.exists() ? opcoesJantaSnapshot.val() : [];
+    opcoesMao = opcoesMaoSnapshot.exists() ? opcoesMaoSnapshot.val() : [];
     
-    if (opcoesJantaSnapshot.exists()) {
-      opcoesJanta = opcoesJantaSnapshot.val() || [];
-      console.log('Opções de janta carregadas:', opcoesJanta);
-    } else {
-      // Se não houver opções no Firebase, deixar vazio
-      opcoesJanta = [];
-    }
-    
-    if (opcoesMaoSnapshot.exists()) {
-      opcoesMao = opcoesMaoSnapshot.val() || [];
-      console.log('Opções de mão carregadas:', opcoesMao);
-    } else {
-      // Se não houver opções no Firebase, deixar vazio
-      opcoesMao = [];
-    }
-    
-    // Renderizar opções após carregar
-    renderizarOpcoes('janta');
-    renderizarOpcoes('mao');
-    
-    // Atualizar avisos se houver opções
+    renderizarOpcoes('janta'); renderizarOpcoes('mao');
     atualizarAvisosEnquetes();
-    
-    // Atualizar lista de opções no modo admin
-    if (modoAdmin) {
-      atualizarListaOpcoesAdmin();
-    }
-    
+    if (modoAdmin) atualizarListaOpcoesAdmin();
   } catch (e) {
     console.error('Erro ao carregar opções:', e);
   }
 }
 
-// ATUALIZAR LISTA DE OPÇÕES NO MODO ADMIN
 function atualizarListaOpcoesAdmin() {
   const listaJanta = document.getElementById('listaOpcoesJanta');
   const listaMao = document.getElementById('listaOpcoesMao');
   
-  // Atualizar lista de opções da janta
   if (opcoesJanta.length > 0) {
     listaJanta.innerHTML = '';
     opcoesJanta.forEach((opcao, index) => {
-      const item = document.createElement('div');
-      item.className = 'option-list-item';
-      item.innerHTML = `
-        <span>${index + 1}. ${opcao}</span>
-        <div>
-          <button class="remove-option-btn" onclick="removerOpcao('janta', ${index})">REMOVER</button>
-        </div>
-      `;
-      listaJanta.appendChild(item);
+      listaJanta.innerHTML += `<div class="option-list-item"><span>${index+1}. ${opcao}</span><div><button class="remove-option-btn" onclick="removerOpcao('janta', ${index})">REMOVER</button></div></div>`;
     });
   } else {
     listaJanta.innerHTML = '<p style="opacity:0.7;font-style:italic;padding:10px">Nenhuma opção definida</p>';
   }
   
-  // Atualizar lista de opções da mão
   if (opcoesMao.length > 0) {
     listaMao.innerHTML = '';
     opcoesMao.forEach((opcao, index) => {
-      const item = document.createElement('div');
-      item.className = 'option-list-item';
-      item.innerHTML = `
-        <span>${index + 1}. ${opcao}</span>
-        <div>
-          <button class="remove-option-btn" onclick="removerOpcao('mao', ${index})">REMOVER</button>
-        </div>
-      `;
-      listaMao.appendChild(item);
+      listaMao.innerHTML += `<div class="option-list-item"><span>${index+1}. ${opcao}</span><div><button class="remove-option-btn" onclick="removerOpcao('mao', ${index})">REMOVER</button></div></div>`;
     });
   } else {
     listaMao.innerHTML = '<p style="opacity:0.7;font-style:italic;padding:10px">Nenhuma opção definida</p>';
   }
 }
 
-// FUNÇÃO PARA ADICIONAR OPÇÃO
-async function adicionarOpcao(tipo, opcao) {
-  if (!opcao || opcao.trim() === '') {
-    alert('Por favor, digite uma opção válida!');
-    return;
-  }
-  
-  const opcaoLimpa = opcao.trim();
-  
-  try {
-    // Obter opções atuais
-    const opcoesAtuais = tipo === 'janta' ? [...opcoesJanta] : [...opcoesMao];
-    
-    // Verificar se opção já existe
-    if (opcoesAtuais.includes(opcaoLimpa)) {
-      alert('Esta opção já existe na lista!');
-      return;
-    }
-    
-    // Adicionar nova opção
-    opcoesAtuais.push(opcaoLimpa);
-    
-    // Salvar no Firebase
-    await set(ref(db, `opcoes/${tipo}`), opcoesAtuais);
-    
-    console.log(`Opção "${opcaoLimpa}" adicionada à ${tipo}`);
-    
-    // Limpar campo de entrada
-    if (tipo === 'janta') {
-      document.getElementById('novaOpcaoJanta').value = '';
-    } else {
-      document.getElementById('novaOpcaoMao').value = '';
-    }
-    
-    alert(`✅ Opção "${opcaoLimpa}" adicionada com sucesso!`);
-    
-  } catch (e) {
-    console.error('Erro ao adicionar opção:', e);
-    alert('❌ Erro ao adicionar opção: ' + e.message);
-  }
-}
-
-// FUNÇÃO PARA REMOVER OPÇÃO
 window.removerOpcao = async function(tipo, index) {
-  if (!confirm(`Tem certeza que deseja remover esta opção?`)) {
-    return;
-  }
-  
+  if (!confirm('Remover opção?')) return;
   try {
     const opcoesAtuais = tipo === 'janta' ? [...opcoesJanta] : [...opcoesMao];
-    
     if (index >= 0 && index < opcoesAtuais.length) {
-      const opcaoRemovida = opcoesAtuais[index];
       opcoesAtuais.splice(index, 1);
-      
-      // Salvar no Firebase
       await set(ref(db, `opcoes/${tipo}`), opcoesAtuais);
-      
-      console.log(`Opção "${opcaoRemovida}" removida da ${tipo}`);
-      alert(`✅ Opção removida com sucesso!`);
+      alert('✅ Opção removida!');
     }
-    
   } catch (e) {
-    console.error('Erro ao remover opção:', e);
-    alert('❌ Erro ao remover opção: ' + e.message);
+    alert('Erro: ' + e.message);
   }
 };
 
-// ATUALIZAR AVISOS DAS ENQUETES
+async function adicionarOpcao(tipo, opcao) {
+  if (!opcao.trim()) { alert('Digite uma opção'); return; }
+  const opcaoLimpa = opcao.trim();
+  try {
+    const opcoesAtuais = tipo === 'janta' ? [...opcoesJanta] : [...opcoesMao];
+    if (opcoesAtuais.includes(opcaoLimpa)) { alert('Opção já existe'); return; }
+    opcoesAtuais.push(opcaoLimpa);
+    await set(ref(db, `opcoes/${tipo}`), opcoesAtuais);
+    document.getElementById(tipo === 'janta' ? 'novaOpcaoJanta' : 'novaOpcaoMao').value = '';
+    alert(`✅ Opção "${opcaoLimpa}" adicionada!`);
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  }
+}
+
+// ========== NOVA LÓGICA DE AVISOS ==========
 function atualizarAvisosEnquetes() {
   const avisoJanta = document.getElementById('avisoJanta');
   const avisoMao = document.getElementById('avisoMao');
@@ -555,480 +454,267 @@ function atualizarAvisosEnquetes() {
   const enqueteMao = document.getElementById('enqueteMao');
   const statusJanta = document.getElementById('statusJanta');
   const statusMao = document.getElementById('statusMao');
-  
-  // Verificar status de encerramento
+
+  // Determinar estado da janta
   if (jantaEncerrada) {
     enqueteJanta.classList.add('encerrada');
     statusJanta.textContent = ' ENCERRADA';
     statusJanta.className = 'status-enquete encerrada';
-    
-    avisoJanta.innerHTML = `
-      <p style="margin-bottom: 10px; font-weight: bold; color: #ff6b6b;">⏹️ VOTAÇÃO ENCERRADA</p>
-      <p style="opacity: 0.9; line-height: 1.6;">A votação da janta foi encerrada pela organização. Não é mais possível votar.</p>
-      <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">📊 Resultados finais disponíveis acima.</p>
-    `;
-    btnVotarJanta.disabled = true;
-    btnVotarJanta.textContent = 'VOTAÇÃO ENCERRADA';
-    btnVotarJanta.style.background = '#8b0000';
-  } else {
+    avisoJanta.innerHTML = `<p style="margin-bottom: 10px; font-weight: bold; color: #ff6b6b;">⏹️ VOTAÇÃO ENCERRADA</p><p>Votação encerrada pela organização.</p>`;
+    btnVotarJanta.disabled = true; btnVotarJanta.textContent = 'VOTAÇÃO ENCERRADA'; btnVotarJanta.style.background = '#8b0000';
+  } 
+  else if (jantaAberta && opcoesJanta.length > 0) {
     enqueteJanta.classList.remove('encerrada');
-    
-    // Atualizar aviso da janta baseado nas opções
-    if (opcoesJanta.length > 0) {
-      statusJanta.textContent = ' ABERTA';
-      statusJanta.className = 'status-enquete aberta';
-      
-      avisoJanta.innerHTML = `
-        <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">🍽️ VOTAÇÃO DA JANTA ABERTA</p>
-        <p style="opacity: 0.9; line-height: 1.6;">Escolha sua opção preferida para a janta! Quanto mais cedo você votar, melhor será a organização.</p>
-        <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">⏰ O prazo de votação será exibido aqui quando definido.</p>
-      `;
-      btnVotarJanta.textContent = 'VOTAR NA JANTA';
-      btnVotarJanta.style.background = '#d4a121';
-      btnVotarJanta.style.cursor = 'pointer';
-    } else {
-      statusJanta.textContent = ' AGUARDANDO';
-      statusJanta.className = 'status-enquete';
-      
-      avisoJanta.innerHTML = `
-        <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
-        <p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a próxima votação da janta. Assim que as opções forem definidas, você poderá votar aqui!</p>
-        <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">⏰ O prazo de votação será exibido quando as opções estiverem disponíveis.</p>
-      `;
-      btnVotarJanta.textContent = 'AGUARDANDO OPÇÕES';
-      btnVotarJanta.style.background = '#666';
-      btnVotarJanta.style.cursor = 'not-allowed';
-    }
+    statusJanta.textContent = ' ABERTA';
+    statusJanta.className = 'status-enquete aberta';
+    avisoJanta.innerHTML = `<p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">🍽️ VOTAÇÃO DA JANTA ABERTA</p><p>Escolha sua opção preferida!</p>`;
+    btnVotarJanta.disabled = !jogadorAtual || !jantaSelecionada;
+    btnVotarJanta.textContent = 'VOTAR NA JANTA';
+    btnVotarJanta.style.background = '#d4a121'; btnVotarJanta.style.cursor = 'pointer';
+  } 
+  else {
+    // Fechada / aguardando definição
+    enqueteJanta.classList.remove('encerrada');
+    statusJanta.textContent = ' AGUARDANDO';
+    statusJanta.className = 'status-enquete fechada';
+    avisoJanta.innerHTML = `
+      <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO PELA ORGANIZAÇÃO</p>
+      <p style="opacity: 0.9;">A organização está definindo as opções para a próxima votação da janta. A enquete aparecerá automaticamente assim que estiver disponível, tanto aqui quanto na mão da etapa.</p>
+      <p style="margin-top: 10px;">⏰ Fique atento! Quando as opções forem liberadas, você poderá votar.</p>
+    `;
+    btnVotarJanta.disabled = true; btnVotarJanta.textContent = 'AGUARDANDO'; btnVotarJanta.style.background = '#666';
   }
-  
-  // Verificar status de encerramento da mão
+
+  // Mão
   if (maoEncerrada) {
     enqueteMao.classList.add('encerrada');
     statusMao.textContent = ' ENCERRADA';
     statusMao.className = 'status-enquete encerrada';
-    
-    avisoMao.innerHTML = `
-      <p style="margin-bottom: 10px; font-weight: bold; color: #ff6b6b;">⏹️ VOTAÇÃO ENCERRADA</p>
-      <p style="opacity: 0.9; line-height: 1.6;">A votação da mão foi encerrada pela organização. Não é mais possível votar.</p>
-      <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">📊 Resultados finais disponíveis acima.</p>
-    `;
-    btnVotarMao.disabled = true;
-    btnVotarMao.textContent = 'VOTAÇÃO ENCERRADA';
-    btnVotarMao.style.background = '#8b0000';
-  } else {
+    avisoMao.innerHTML = `<p style="margin-bottom: 10px; font-weight: bold; color: #ff6b6b;">⏹️ VOTAÇÃO ENCERRADA</p><p>Votação encerrada pela organização.</p>`;
+    btnVotarMao.disabled = true; btnVotarMao.textContent = 'VOTAÇÃO ENCERRADA'; btnVotarMao.style.background = '#8b0000';
+  }
+  else if (maoAberta && opcoesMao.length > 0) {
     enqueteMao.classList.remove('encerrada');
-    
-    // Atualizar aviso da mão baseado nas opções
-    if (opcoesMao.length > 0) {
-      statusMao.textContent = ' ABERTA';
-      statusMao.className = 'status-enquete aberta';
-      
-      avisoMao.innerHTML = `
-        <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">🎰 MÃO DA ETAPA - VOTAÇÃO ABERTA!</p>
-        <p style="opacity: 0.9; line-height: 1.6;">Quem <strong>ganhar a mão</strong> com as cartas escolhidas e tiver <strong>showdown</strong> fica elegível a girar a <strong>Roleta da Sorte</strong> 🎡 e concorrer a prêmios especiais!</p>
-        <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">📋 Para mais informações, <a href="https://pokerdequinta.github.io/regulamento/" style="color: #d4a121; font-weight: bold; text-decoration: underline;">Leia o Regulamento</a></p>
-      `;
-      btnVotarMao.textContent = 'VOTAR NA MÃO';
-      btnVotarMao.style.background = '#d4a121';
-      btnVotarMao.style.cursor = 'pointer';
-    } else {
-      statusMao.textContent = ' AGUARDANDO';
-      statusMao.className = 'status-enquete';
-      
-      avisoMao.innerHTML = `
-        <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO DAS OPÇÕES</p>
-        <p style="opacity: 0.9; line-height: 1.6;">A organização está definindo as opções para a Mão da Etapa. Assim que as opções forem definidas, você poderá votar aqui!</p>
-        <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.85;">🎰 A Mão da Etapa ativa a Roleta da Sorte para prêmios especiais!</p>
-      `;
-      btnVotarMao.textContent = 'AGUARDANDO OPÇÕES';
-      btnVotarMao.style.background = '#666';
-      btnVotarMao.style.cursor = 'not-allowed';
-    }
+    statusMao.textContent = ' ABERTA';
+    statusMao.className = 'status-enquete aberta';
+    avisoMao.innerHTML = `<p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">🎰 MÃO DA ETAPA - VOTAÇÃO ABERTA!</p><p>Quem ganhar a mão com as cartas escolhidas e tiver showdown gira a Roleta da Sorte!</p>`;
+    btnVotarMao.disabled = !jogadorAtual || !maoSelecionada;
+    btnVotarMao.textContent = 'VOTAR NA MÃO'; btnVotarMao.style.background = '#d4a121'; btnVotarMao.style.cursor = 'pointer';
+  } 
+  else {
+    enqueteMao.classList.remove('encerrada');
+    statusMao.textContent = ' AGUARDANDO';
+    statusMao.className = 'status-enquete fechada';
+    avisoMao.innerHTML = `
+      <p style="margin-bottom: 10px; font-weight: bold; color: #d4a121;">📋 AGUARDANDO DEFINIÇÃO PELA ORGANIZAÇÃO</p>
+      <p style="opacity: 0.9;">A organização está definindo as opções para a Mão da Etapa. A enquete aparecerá automaticamente assim que estiver disponível, tanto aqui quanto na janta.</p>
+      <p style="margin-top: 10px;">🎰 A Mão da Etapa ativa a Roleta da Sorte para prêmios especiais!</p>
+    `;
+    btnVotarMao.disabled = true; btnVotarMao.textContent = 'AGUARDANDO'; btnVotarMao.style.background = '#666';
   }
 }
 
+// ========== INICIALIZAÇÃO FIREBASE ==========
 try {
   const app = initializeApp(firebaseConfig);
   db = getDatabase(app);
   
-  console.log('Conectado ao Firebase');
+  // Monitorar estados
+  onValue(ref(db, 'controle/jantaAberta'), (snap) => { jantaAberta = snap.val() || false; atualizarAvisosEnquetes(); renderizarOpcoes('janta'); });
+  onValue(ref(db, 'controle/maoAberta'), (snap) => { maoAberta = snap.val() || false; atualizarAvisosEnquetes(); renderizarOpcoes('mao'); });
+  onValue(ref(db, 'controle/jantaEncerrada'), (snap) => { jantaEncerrada = snap.val() || false; atualizarAvisosEnquetes(); renderizarOpcoes('janta'); });
+  onValue(ref(db, 'controle/maoEncerrada'), (snap) => { maoEncerrada = snap.val() || false; atualizarAvisosEnquetes(); renderizarOpcoes('mao'); });
   
-  // Monitorar status de encerramento
-  onValue(ref(db, 'controle/jantaEncerrada'), (snapshot) => {
-    jantaEncerrada = snapshot.val() || false;
-    atualizarAvisosEnquetes();
-    renderizarOpcoes('janta');
-  });
+  // Opções
+  onValue(ref(db, 'opcoes/janta'), () => carregarOpcoesDoFirebase());
+  onValue(ref(db, 'opcoes/mao'), () => carregarOpcoesDoFirebase());
   
-  onValue(ref(db, 'controle/maoEncerrada'), (snapshot) => {
-    maoEncerrada = snapshot.val() || false;
-    atualizarAvisosEnquetes();
-    renderizarOpcoes('mao');
-  });
+  // Votos
+  onValue(ref(db, 'enquetes/janta'), (snap) => { votosJanta = snap.val() || {}; renderizarOpcoes('janta'); atualizarDashboard(); });
+  onValue(ref(db, 'enquetes/mao'), (snap) => { votosMao = snap.val() || {}; renderizarOpcoes('mao'); atualizarDashboard(); });
   
-  // Carregar opções do Firebase
   carregarOpcoesDoFirebase();
-  
-  // Monitorar mudanças nas opções
-  onValue(ref(db, 'opcoes/janta'), () => {
-    carregarOpcoesDoFirebase();
-  });
-  
-  onValue(ref(db, 'opcoes/mao'), () => {
-    carregarOpcoesDoFirebase();
-  });
-  
-  onValue(ref(db, 'enquetes/janta'), (snapshot) => {
-    votosJanta = snapshot.val() || {};
-    renderizarOpcoes('janta');
-    atualizarDashboard();
-  });
-  
-  onValue(ref(db, 'enquetes/mao'), (snapshot) => {
-    votosMao = snapshot.val() || {};
-    renderizarOpcoes('mao');
-    atualizarDashboard();
-  });
-} catch (e) {
-  console.error(e);
-}
+} catch (e) { console.error(e); }
 
-// Preencher select de jogadores
+// Preencher select
 const selectJogador = document.getElementById('playerSelect');
 jogadores.sort().forEach(j => {
   const o = document.createElement('option');
   o.value = o.textContent = j;
   selectJogador.appendChild(o);
 });
-
 selectJogador.onchange = (e) => {
   jogadorAtual = e.target.value;
-  // Só habilita os botões se não estiver encerrado, houver opções e seleção
-  btnVotarJanta.disabled = !jogadorAtual || !jantaSelecionada || opcoesJanta.length === 0 || jantaEncerrada;
-  btnVotarMao.disabled = !jogadorAtual || !maoSelecionada || opcoesMao.length === 0 || maoEncerrada;
-  renderizarOpcoes('janta');
-  renderizarOpcoes('mao');
+  // Botões serão habilitados conforme estado em atualizarAvisosEnquetes + seleção
+  renderizarOpcoes('janta'); renderizarOpcoes('mao');
+  atualizarAvisosEnquetes(); // Recalcula disabled dos botões
 };
 
 function renderizarOpcoes(tipo) {
   const opcoes = tipo === 'janta' ? opcoesJanta : opcoesMao;
   const votos = tipo === 'janta' ? votosJanta : votosMao;
   const container = document.getElementById(tipo + 'Options');
-  const resultsContainer = document.getElementById(tipo + 'Results');
   const isEncerrada = tipo === 'janta' ? jantaEncerrada : maoEncerrada;
-  
-  // Sempre esconder resultados por enquanto
-  resultsContainer.style.display = 'none';
+  const isAberta = tipo === 'janta' ? jantaAberta : maoAberta;
   
   let totalVotos = 0;
-  let votosPorOpcao = {};
-  let votantesPorOpcao = {};
-  
-  Object.values(votos).forEach(voto => {
+  let votosPorOpcao = {}, votantesPorOpcao = {};
+  Object.values(votos).forEach(v => {
     totalVotos++;
-    votosPorOpcao[voto.opcao] = (votosPorOpcao[voto.opcao] || 0) + 1;
-    if (!votantesPorOpcao[voto.opcao]) votantesPorOpcao[voto.opcao] = [];
-    votantesPorOpcao[voto.opcao].push(voto.jogador);
+    votosPorOpcao[v.opcao] = (votosPorOpcao[v.opcao] || 0) + 1;
+    if (!votantesPorOpcao[v.opcao]) votantesPorOpcao[v.opcao] = [];
+    votantesPorOpcao[v.opcao].push(v.jogador);
   });
   
-  let jaVotou = false;
   let votoAnterior = null;
-  Object.entries(votos).forEach(([key, voto]) => {
-    if (voto.jogador === jogadorAtual) {
-      jaVotou = true;
-      votoAnterior = voto.opcao;
-    }
-  });
+  Object.entries(votos).forEach(([key, voto]) => { if (voto.jogador === jogadorAtual) votoAnterior = voto.opcao; });
   
   container.innerHTML = '';
   
-  // Se não houver opções definidas
   if (opcoes.length === 0) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 30px; color: #d4a121; opacity: 0.7;">
-        <div style="font-size: 2.5em; margin-bottom: 15px;">⏳</div>
-        <div style="font-weight: bold; margin-bottom: 10px; font-size: 1.2em;">Opções ainda não definidas</div>
-        <div style="opacity: 0.9;">A organização está definindo as opções de votação. Em breve você poderá votar aqui!</div>
-        <div style="margin-top: 15px; font-size: 0.9em; opacity: 0.8;">
-          <strong>Como funciona:</strong> Quando as opções forem definidas, elas aparecerão aqui automaticamente.
-        </div>
-      </div>
-    `;
+    container.innerHTML = `<div style="text-align: center; padding: 30px; color: #d4a121;"><div style="font-size:2.5em">⏳</div><div>Opções ainda não definidas</div></div>`;
     return;
   }
   
-  // Se estiver encerrada, mostrar mensagem
   if (isEncerrada) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 30px; color: #ff6b6b;">
-        <div style="font-size: 2.5em; margin-bottom: 15px;">⏹️</div>
-        <div style="font-weight: bold; margin-bottom: 10px; font-size: 1.2em;">VOTAÇÃO ENCERRADA</div>
-        <div style="opacity: 0.9;">A votação foi encerrada pela organização. Não é mais possível votar.</div>
-        <div style="margin-top: 15px; font-size: 0.9em; opacity: 0.8;">
-          <strong>Resultados finais:</strong> Total de ${totalVotos} voto${totalVotos !== 1 ? 's' : ''}
-        </div>
-      </div>
-    `;
+    container.innerHTML = `<div style="text-align:center;padding:30px;color:#ff6b6b;"><div style="font-size:2.5em">⏹️</div><div>VOTAÇÃO ENCERRADA</div><div>Total: ${totalVotos} votos</div></div>`;
     return;
   }
   
-  // Se houver opções, renderizar normalmente
+  if (!isAberta) {
+    // Não está aberta (mesmo com opções), mostra placeholder
+    container.innerHTML = `<div style="text-align: center; padding: 30px; color: #d4a121;"><div style="font-size:2.5em">⏳</div><div>Enquete ainda não aberta pela organização.</div><div>As opções já estão definidas, mas a votação será liberada em breve.</div></div>`;
+    return;
+  }
+  
+  // Renderizar opções normalmente
   opcoes.forEach(opcao => {
     const numVotos = votosPorOpcao[opcao] || 0;
     const percentual = totalVotos > 0 ? (numVotos / totalVotos * 100).toFixed(1) : 0;
-    const isSelected = tipo === 'janta' ? jantaSelecionada === opcao : maoSelecionada === opcao;
+    const isSelected = (tipo === 'janta' ? jantaSelecionada : maoSelecionada) === opcao;
     const jaVotouNesta = votoAnterior === opcao;
     
     const div = document.createElement('div');
     div.className = 'vote-option' + (isSelected ? ' selected' : '');
     div.onclick = () => {
-      if (!jogadorAtual) {
-        alert('Selecione seu nome primeiro!');
-        return;
-      }
-      if (isEncerrada) {
-        alert('Esta votação foi encerrada!');
-        return;
-      }
-      if (tipo === 'janta') {
-        jantaSelecionada = opcao;
-        btnVotarJanta.disabled = false;
-      } else {
-        maoSelecionada = opcao;
-        btnVotarMao.disabled = false;
-      }
+      if (!jogadorAtual) { alert('Selecione seu nome'); return; }
+      if (isEncerrada || !isAberta) { alert('Votação não disponível'); return; }
+      if (tipo === 'janta') { jantaSelecionada = opcao; } else { maoSelecionada = opcao; }
       renderizarOpcoes(tipo);
+      atualizarAvisosEnquetes(); // reavalia disabled dos botões
     };
     
     div.innerHTML = `
-      <div class="option-header">
-        <span class="option-name">${opcao} ${jaVotouNesta ? '✅' : ''}</span>
-        <span class="option-votes">${numVotos} voto${numVotos !== 1 ? 's' : ''} (${percentual}%)</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" style="width:${percentual}%"></div>
-      </div>
-      ${numVotos > 0 ? `
-        <div class="voters-list">
-          <h4>Votaram nesta opção:</h4>
-          ${votantesPorOpcao[opcao].map(v => {
-            const votoKey = Object.keys(votos).find(key => votos[key].jogador === v && votos[key].opcao === opcao);
-            const btnRemover = modoAdmin ? `<button class="remove-vote-btn" onclick="removerVoto('${tipo}','${votoKey}')">❌</button>` : '';
-            return `<span class="voter-tag">${v}${btnRemover}</span>`;
-          }).join('')}
-        </div>
-      ` : ''}
+      <div class="option-header"><span class="option-name">${opcao} ${jaVotouNesta ? '✅' : ''}</span><span class="option-votes">${numVotos} voto(s) (${percentual}%)</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${percentual}%"></div></div>
+      ${numVotos > 0 ? `<div class="voters-list"><h4>Votaram:</h4>${votantesPorOpcao[opcao].map(v => {
+        const votoKey = Object.keys(votos).find(key => votos[key].jogador === v && votos[key].opcao === opcao);
+        const btnRemover = modoAdmin ? `<button class="remove-vote-btn" onclick="removerVoto('${tipo}','${votoKey}')">❌</button>` : '';
+        return `<span class="voter-tag">${v}${btnRemover}</span>`;
+      }).join('')}</div>` : ''}
     `;
-    
     container.appendChild(div);
   });
 }
 
+// Botões de voto
 btnVotarJanta.onclick = async () => {
   if (!jogadorAtual || !jantaSelecionada) return;
-  if (opcoesJanta.length === 0) {
-    alert('As opções da janta ainda não foram definidas!');
-    return;
-  }
-  if (jantaEncerrada) {
-    alert('A votação da janta foi encerrada!');
-    return;
-  }
-  
+  if (!jantaAberta || jantaEncerrada || opcoesJanta.length === 0) { alert('Votação indisponível'); return; }
   const votosRef = ref(db, 'enquetes/janta');
   const snapshot = await get(votosRef);
   if (snapshot.exists()) {
-    const votos = snapshot.val();
-    for (let key in votos) {
-      if (votos[key].jogador === jogadorAtual) {
-        await remove(ref(db, `enquetes/janta/${key}`));
-      }
+    for (let key in snapshot.val()) {
+      if (snapshot.val()[key].jogador === jogadorAtual) await remove(ref(db, `enquetes/janta/${key}`));
     }
   }
-  
-  await push(ref(db, 'enquetes/janta'), {
-    jogador: jogadorAtual,
-    opcao: jantaSelecionada,
-    data: new Date().toISOString()
-  });
-  
-  alert('Voto registrado com sucesso! Não Esqueça de Votar na Mão da Etapa 🎉');
-  jantaSelecionada = null;
-  btnVotarJanta.disabled = true;
+  await push(ref(db, 'enquetes/janta'), { jogador: jogadorAtual, opcao: jantaSelecionada, data: new Date().toISOString() });
+  alert('Voto registrado! 🎉');
+  jantaSelecionada = null; btnVotarJanta.disabled = true; renderizarOpcoes('janta');
 };
 
 btnVotarMao.onclick = async () => {
   if (!jogadorAtual || !maoSelecionada) return;
-  if (opcoesMao.length === 0) {
-    alert('As opções da mão ainda não foram definidas!');
-    return;
-  }
-  if (maoEncerrada) {
-    alert('A votação da mão foi encerrada!');
-    return;
-  }
-  
+  if (!maoAberta || maoEncerrada || opcoesMao.length === 0) { alert('Votação indisponível'); return; }
   const votosRef = ref(db, 'enquetes/mao');
   const snapshot = await get(votosRef);
   if (snapshot.exists()) {
-    const votos = snapshot.val();
-    for (let key in votos) {
-      if (votos[key].jogador === jogadorAtual) {
-        await remove(ref(db, `enquetes/mao/${key}`));
-      }
+    for (let key in snapshot.val()) {
+      if (snapshot.val()[key].jogador === jogadorAtual) await remove(ref(db, `enquetes/mao/${key}`));
     }
   }
-  
-  await push(ref(db, 'enquetes/mao'), {
-    jogador: jogadorAtual,
-    opcao: maoSelecionada,
-    data: new Date().toISOString()
-  });
-  
-  alert('Voto registrado com sucesso! 🎉');
-  maoSelecionada = null;
-  btnVotarMao.disabled = true;
+  await push(ref(db, 'enquetes/mao'), { jogador: jogadorAtual, opcao: maoSelecionada, data: new Date().toISOString() });
+  alert('Voto registrado! 🎉');
+  maoSelecionada = null; btnVotarMao.disabled = true; renderizarOpcoes('mao');
 };
 
 function atualizarDashboard() {
-  let votosPorJanta = {};
-  let votantesJanta = new Set();
-  Object.values(votosJanta).forEach(voto => {
-    votosPorJanta[voto.opcao] = (votosPorJanta[voto.opcao] || 0) + 1;
-    votantesJanta.add(voto.jogador);
-  });
-  
-  let jantaVencedor = '-';
-  let jantaMaxVotos = 0;
-  Object.entries(votosPorJanta).forEach(([opcao, votos]) => {
-    if (votos > jantaMaxVotos) {
-      jantaMaxVotos = votos;
-      jantaVencedor = opcao;
-    }
-  });
+  let votosPorJanta = {}, votantesJanta = new Set();
+  Object.values(votosJanta).forEach(v => { votosPorJanta[v.opcao] = (votosPorJanta[v.opcao]||0)+1; votantesJanta.add(v.jogador); });
+  let jantaVencedor = '-', jantaMaxVotos = 0;
+  Object.entries(votosPorJanta).forEach(([op, v]) => { if (v > jantaMaxVotos) { jantaMaxVotos = v; jantaVencedor = op; } });
   document.getElementById('dashJantaVencedor').textContent = jantaVencedor;
-  document.getElementById('dashJantaVotos').textContent = `${jantaMaxVotos} voto${jantaMaxVotos !== 1 ? 's' : ''}`;
-  document.getElementById('dashJantaVencedor').style.color = '#fff';
-  document.getElementById('dashJantaVotos').style.color = '#d4a121';
+  document.getElementById('dashJantaVotos').textContent = `${jantaMaxVotos} voto(s)`;
   
-  let votosPorMao = {};
-  let votantesMao = new Set();
-  Object.values(votosMao).forEach(voto => {
-    votosPorMao[voto.opcao] = (votosPorMao[voto.opcao] || 0) + 1;
-    votantesMao.add(voto.jogador);
-  });
-  
-  let maoVencedor = '-';
-  let maoMaxVotos = 0;
-  Object.entries(votosPorMao).forEach(([opcao, votos]) => {
-    if (votos > maoMaxVotos) {
-      maoMaxVotos = votos;
-      maoVencedor = opcao;
-    }
-  });
+  let votosPorMao = {}, votantesMao = new Set();
+  Object.values(votosMao).forEach(v => { votosPorMao[v.opcao] = (votosPorMao[v.opcao]||0)+1; votantesMao.add(v.jogador); });
+  let maoVencedor = '-', maoMaxVotos = 0;
+  Object.entries(votosPorMao).forEach(([op, v]) => { if (v > maoMaxVotos) { maoMaxVotos = v; maoVencedor = op; } });
   document.getElementById('dashMaoVencedor').textContent = maoVencedor;
-  document.getElementById('dashMaoVotos').textContent = `${maoMaxVotos} voto${maoMaxVotos !== 1 ? 's' : ''}`;
+  document.getElementById('dashMaoVotos').textContent = `${maoMaxVotos} voto(s)`;
   
-  const totalVotantes = new Set([...Object.values(votosJanta).map(v => v.jogador), ...Object.values(votosMao).map(v => v.jogador)]).size;
-  
-  // CALCULAR PARTICIPAÇÃO BASEADA EM 20 (não no número de jogadores)
-  const participacao = TOTAL_PARTICIPANTES > 0 ? ((totalVotantes / TOTAL_PARTICIPANTES) * 100).toFixed(1) : 0;
-  
-  document.getElementById('dashParticipacao').textContent = `${participacao}%`;
+  const totalVotantes = new Set([...votantesJanta, ...votantesMao]).size;
+  const participacao = TOTAL_PARTICIPANTES > 0 ? ((totalVotantes / TOTAL_PARTICIPANTES)*100).toFixed(1) : 0;
+  document.getElementById('dashParticipacao').textContent = participacao + '%';
   document.getElementById('dashTotalVotos').textContent = `${totalVotantes}/${TOTAL_PARTICIPANTES} votantes`;
 }
 
-// Função para remover voto (apenas admin)
 window.removerVoto = async (tipo, votoKey) => {
   if (!modoAdmin) return;
-  if (!confirm('Remover este voto?')) return;
-  
-  try {
-    await remove(ref(db, `enquetes/${tipo}/${votoKey}`));
-    alert('Voto removido com sucesso!');
-  } catch (e) {
-    alert('Erro ao remover voto: ' + e.message);
-  }
+  if (!confirm('Remover voto?')) return;
+  try { await remove(ref(db, `enquetes/${tipo}/${votoKey}`)); alert('Voto removido'); } catch (e) { alert('Erro: '+e.message); }
 };
 
-// Modo Admin
+// Admin
 btnModoAdmin.onclick = () => modalAdmin.classList.add('active');
 btnFecharAdmin.onclick = () => modalAdmin.classList.remove('active');
 btnAcessarAdmin.onclick = () => {
   if (document.getElementById('senhaAdmin').value === "poker2026") {
     modoAdmin = true;
     modalAdmin.classList.remove('active');
-    btnModoAdmin.style.background = '#4CAF50';
-    btnModoAdmin.style.opacity = '1';
+    btnModoAdmin.style.background = '#4CAF50'; btnModoAdmin.style.opacity = '1';
     document.getElementById('adminSection').style.display = 'block';
-    
-    // Atualizar lista de opções no modo admin
     atualizarListaOpcoesAdmin();
-    
-    alert("Modo Admin Ativado! Agora você pode gerenciar as opções de votação.");
-    renderizarOpcoes('janta');
-    renderizarOpcoes('mao');
-  } else {
-    alert("Senha incorreta!");
-  }
+    renderizarOpcoes('janta'); renderizarOpcoes('mao');
+    alert("Modo Admin Ativado!");
+  } else alert("Senha incorreta!");
 };
-
-// Sair do modo admin
 document.getElementById('btnSairAdmin').onclick = () => {
   modoAdmin = false;
   document.getElementById('adminSection').style.display = 'none';
-  btnModoAdmin.style.background = 'rgba(13,27,13,0.3)';
-  btnModoAdmin.style.opacity = '0.15';
-  alert("Modo Admin Desativado!");
+  btnModoAdmin.style.background = 'rgba(13,27,13,0.3)'; btnModoAdmin.style.opacity = '0.15';
 };
 
-// Botões de adicionar opções
-document.getElementById('btnAddJanta').onclick = () => {
-  const opcao = document.getElementById('novaOpcaoJanta').value;
-  adicionarOpcao('janta', opcao);
-};
+// Botões adicionar
+document.getElementById('btnAddJanta').onclick = () => adicionarOpcao('janta', document.getElementById('novaOpcaoJanta').value);
+document.getElementById('btnAddMao').onclick = () => adicionarOpcao('mao', document.getElementById('novaOpcaoMao').value);
 
-document.getElementById('btnAddMao').onclick = () => {
-  const opcao = document.getElementById('novaOpcaoMao').value;
-  adicionarOpcao('mao', opcao);
-};
+// Botões limpar
+document.getElementById('btnLimparVotos').onclick = limparTodosVotos;
+document.getElementById('btnLimparOpcoes').onclick = limparTodasOpcoes;
 
-// Botões de gerenciamento
-document.getElementById('btnLimparVotos').onclick = () => {
-  if (confirm('⚠️ ATENÇÃO: Isso irá remover TODOS os votos das enquetes. Deseja continuar?')) {
-    limparTodosVotos();
-  }
-};
-
-document.getElementById('btnLimparOpcoes').onclick = () => {
-  limparTodasOpcoes();
-};
-
-// NOVOS BOTÕES DE ENCERRAMENTO
+// Botões abrir/encerrar
+document.getElementById('btnAbrirJanta').onclick = abrirEnqueteJanta;
+document.getElementById('btnAbrirMao').onclick = abrirEnqueteMao;
 document.getElementById('btnEncerrarJanta').onclick = encerrarEnqueteJanta;
 document.getElementById('btnEncerrarMao').onclick = encerrarEnqueteMao;
 
-// Permitir Enter para adicionar opções
-document.getElementById('novaOpcaoJanta').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    adicionarOpcao('janta', e.target.value);
-  }
-});
+// Enter nos inputs
+document.getElementById('novaOpcaoJanta').addEventListener('keypress', (e) => { if (e.key === 'Enter') adicionarOpcao('janta', e.target.value); });
+document.getElementById('novaOpcaoMao').addEventListener('keypress', (e) => { if (e.key === 'Enter') adicionarOpcao('mao', e.target.value); });
 
-document.getElementById('novaOpcaoMao').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    adicionarOpcao('mao', e.target.value);
-  }
-});
-
-// Inicialização
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('Sistema de enquetes carregado');
-  console.log('Modo admin com gerenciamento de opções disponível');
-});
-
+// Inicial
+document.addEventListener('DOMContentLoaded', () => console.log('Sistema carregado'));
 </script>
 </body>
-
 </html>
-
